@@ -1,0 +1,84 @@
+version: "3.8"
+
+services:
+  # Development service
+  app-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        NODE_ENV: development
+    container_name: trinity-front-dev
+    ports:
+      - "3000:3000"
+      - "24678:24678" # Vite HMR websocket port
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/node_modules/.vite
+      - /app/node_modules/.vite-temp
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true # Enable polling for Windows compatibility
+      - WATCHPACK_POLLING=true # Enable polling for Webpack/Vite
+      - VITE_APP_HOST=0.0.0.0
+    networks:
+      - app-network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000",
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 5s
+
+  # Production service
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: trinity-front-prod
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - app-network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:80",
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 5s
+
+networks:
+  app-network:
+    driver: bridge
+    name: trinity-network
+
+volumes:
+  node_modules:
+  vite_temp:
+  vite_cache:

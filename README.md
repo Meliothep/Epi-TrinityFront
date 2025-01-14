@@ -1,34 +1,123 @@
-## Usage
+# Trinity Frontend 🚀
 
-Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
+A modern SolidJS application built with Vite.
 
-This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
+## Table of Contents 📑
+- [Prerequisites](#prerequisites)
+- [Getting Started](#getting-started)
+  - [Quick Start](#quick-start)
+  - [Local Development](#local-development)
+  - [Docker Development](#docker-development)
+- [Production Deployment](#production-deployment)
+- [Environment Variables](#environment-variables)
+- [Available Scripts](#available-scripts)
+- [Contributing](#contributing)
 
+## Prerequisites 📋
+
+### Local Development
+- Node.js 20.x or later
+- pnpm (recommended) or npm
+- Git
+
+### Docker Development
+- Docker
+- Docker Compose
+
+## Getting Started 🎯
+
+First, clone the repository:
 ```bash
-$ npm install # or pnpm install or yarn install
+git clone <repository-url>
+cd trinity-frontend
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+### Quick Start 🚀
 
-## Available Scripts
+#### Windows
+```bash
+.\dev.bat
+```
 
-In the project directory, you can run:
+#### Unix/MacOS
+```bash
+chmod +x dev.sh  # First time only
+./dev.sh
+```
 
-### `npm run dev` or `npm start`
+### Local Development 💻
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Install dependencies:
+```bash
+pnpm install
+```
 
-The page will reload if you make edits.<br>
+2. Copy the environment template:
+```bash
+cp .env.template .env
+```
 
-### `npm run build`
+3. Start the development server:
+```bash
+pnpm dev
+```
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+Your app will be available at `http://localhost:3000`
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+### Docker Development 🐳
 
-## Deployment
+1. Copy the environment template:
+```bash
+cp .env.template .env
+```
 
-You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
+2. Start the development container:
+```bash
+docker compose up app-dev
+```
+
+Your app will be available at `http://localhost:3000` with hot reload enabled.
+
+## Production Deployment 🚀
+
+### Local Build
+```bash
+pnpm build
+pnpm serve  # To preview the production build
+```
+
+### Docker Production
+```bash
+docker compose up app-prod
+```
+
+The production build will be available at `http://localhost:80`
+
+## Environment Variables 🔧
+
+Copy `.env.template` to create your `.env` file:
+
+| Variable      | Description      | Default     |
+| ------------- | ---------------- | ----------- |
+| VITE_APP_PORT | Application port | 3000        |
+| VITE_APP_HOST | Application host | 0.0.0.0     |
+| NODE_ENV      | Environment mode | development |
+
+## Available Scripts 📜
+
+| Command      | Description                     |
+| ------------ | ------------------------------- |
+| `pnpm dev`   | Start development server        |
+| `pnpm build` | Build for production            |
+| `pnpm serve` | Preview production build        |
+| `pnpm test`  | Run tests                       |
+| `dev.bat`    | Start dev environment (Windows) |
+| `dev.sh`     | Start dev environment (Unix)    |
+
+## Contributing 🤝
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request

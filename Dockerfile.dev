@@ -1,0 +1,45 @@
+# Use Node.js LTS version with alpine for smaller image size
+FROM node:20-alpine
+
+# Add labels for better maintainability
+LABEL maintainer="Trinity Team"
+LABEL description="Development environment for Trinity Frontend"
+
+# Set working directory
+WORKDIR /app
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
+
+# Install dependencies with frozen lockfile
+RUN pnpm install --frozen-lockfile
+
+# Copy the rest of the application
+COPY . .
+
+# Create Vite directories with proper permissions
+RUN mkdir -p /app/node_modules/.vite /app/node_modules/.vite-temp && \
+    chmod 777 /app/node_modules/.vite && \
+    chmod 777 /app/node_modules/.vite-temp && \
+    chmod 777 /app/node_modules
+
+# Expose ports - 3000 for app, 24678 for Vite HMR
+EXPOSE 3000
+EXPOSE 24678
+
+# Set environment variables
+ENV NODE_ENV=development
+ENV VITE_APP_HOST=0.0.0.0
+ENV HOST=0.0.0.0
+ENV PORT=3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+# Start development server with HMR
+CMD ["pnpm", "dev", "--host", "0.0.0.0"] 

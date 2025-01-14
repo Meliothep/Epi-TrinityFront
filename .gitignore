@@ -39,3 +39,11 @@ dist/**/*
 
 # ignore yarn.lock
 yarn.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker/
