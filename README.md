@@ -1,123 +1,457 @@
-# Trinity Frontend 🚀
+# Trinity Frontend
 
-A modern SolidJS application built with Vite.
+A modern, accessible, and dark-mode compatible SolidJS application with a component library built using Tailwind CSS.
 
-## Table of Contents 📑
-- [Prerequisites](#prerequisites)
+## 📋 Table of Contents
+
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Component Architecture](#component-architecture)
+- [State Management](#state-management)
 - [Getting Started](#getting-started)
-  - [Quick Start](#quick-start)
-  - [Local Development](#local-development)
-  - [Docker Development](#docker-development)
-- [Production Deployment](#production-deployment)
-- [Environment Variables](#environment-variables)
-- [Available Scripts](#available-scripts)
-- [Contributing](#contributing)
+- [Development](#development)
+- [Best Practices](#best-practices)
+- [Component Best Practices](#component-best-practices)
+- [Code Best Practices](#code-best-practices)
 
-## Prerequisites 📋
+## ✨ Features
 
-### Local Development
-- Node.js 20.x or later
-- pnpm (recommended) or npm
-- Git
+- 🎨 Modern UI with dark mode support
+- 📱 Responsive design
+- ♿ Accessibility focused
+- 🔍 Type-safe with TypeScript
+- 🎯 Component-driven development
+- 🔄 Efficient state management
+- 🚀 Fast development workflow
 
-### Docker Development
-- Docker
-- Docker Compose
+## 🏗 Project Structure
 
-## Getting Started 🎯
-
-First, clone the repository:
-```bash
-git clone <repository-url>
-cd trinity-frontend
+```
+src/
+├── assets/              # Static assets
+│   └── images/         # Image files
+├── components/          # UI components
+│   ├── ui/            # Base UI components
+│   ├── common/        # Shared components
+│   ├── forms/         # Form components
+│   ├── layout/        # Layout components
+│   └── features/      # Feature components
+├── hooks/              # Custom hooks
+├── lib/                # Utilities
+├── routes/             # Page components
+├── services/           # API services
+├── stores/             # State management
+├── types/              # TypeScript types
+└── app.tsx             # Root component
 ```
 
-### Quick Start 🚀
+## 🎨 Component Architecture
 
-#### Windows
-```bash
-.\dev.bat
+```mermaid
+graph TD
+    A[App] --> B[Layout]
+    B --> C[Header]
+    B --> D[Main Content]
+    B --> E[Footer]
+    
+    D --> F[Features]
+    F --> G[Auth]
+    F --> H[Products]
+    F --> I[Cart]
+    F --> J[Checkout]
+    
+    subgraph "Feature Components"
+        G --> G1[LoginForm]
+        G --> G2[RegisterForm]
+        H --> H1[ProductList]
+        H --> H2[ProductCard]
+        H --> H3[ProductSearch]
+        I --> I1[CartItem]
+        I --> I2[CartSummary]
+        J --> J1[CheckoutForm]
+        J --> J2[PaymentForm]
+    end
 ```
 
-#### Unix/MacOS
-```bash
-chmod +x dev.sh  # First time only
-./dev.sh
+## 🔄 State Management Flow
+
+```mermaid
+graph LR
+    A[User Action] --> B[Store]
+    B --> C[Service]
+    C --> D[API]
+    D --> C
+    C --> B
+    B --> E[Components]
+    E --> F[UI Update]
 ```
 
-### Local Development 💻
+## 🚀 Getting Started
 
-1. Install dependencies:
-```bash
-pnpm install
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/trinity-frontend.git
+   ```
 
-2. Copy the environment template:
-```bash
-cp .env.template .env
-```
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
 
 3. Start the development server:
-```bash
-pnpm dev
+   ```bash
+   # Windows
+   .\dev.bat
+
+   # Unix/MacOS
+   chmod +x dev.sh  # First time only
+   ./dev.sh
+   ```
+
+The app will be available at `http://localhost:3000` with hot reload enabled.
+
+## 💻 Development
+
+### Component Structure
+
+Each component follows a consistent structure:
+- Props interface
+- Component implementation
+- Styles (Tailwind classes)
+- Dark mode support
+- Accessibility features
+
+Example:
+```tsx
+interface ButtonProps {
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+}
+
+export const Button: Component<ButtonProps> = (props) => {
+  // Component implementation
+};
 ```
 
-Your app will be available at `http://localhost:3000`
+### State Management
 
-### Docker Development 🐳
+We use Solid.js signals for state management:
+```tsx
+// Store definition
+const [state, setState] = createSignal(initialValue);
 
-1. Copy the environment template:
-```bash
-cp .env.template .env
+// Component usage
+const Component = () => {
+  const store = useStore();
+  return <div>{store.value()}</div>;
+};
 ```
 
-2. Start the development container:
-```bash
-docker compose up app-dev
+## 📚 Best Practices
+
+1. **Component Organization**
+   - Keep components small and focused
+   - Use composition over inheritance
+   - Follow the Single Responsibility Principle
+
+2. **State Management**
+   - Use local state when possible
+   - Centralize shared state in stores
+   - Keep state updates predictable
+
+3. **Styling**
+   - Use Tailwind CSS utility classes
+   - Follow design system tokens
+   - Ensure dark mode compatibility
+
+4. **Performance**
+   - Lazy load routes and components
+   - Optimize re-renders
+   - Use proper memoization
+
+5. **Accessibility**
+   - Include proper ARIA attributes
+   - Ensure keyboard navigation
+   - Maintain proper contrast ratios
+
+## 🎯 Component Best Practices
+
+### 1. Component Structure
+
+```tsx
+// 1. Imports
+import { Component, createSignal, createEffect } from "solid-js";
+import { useTheme } from "../../stores/theme";
+import { Button } from "../ui/Button";
+
+// 2. Types/Interfaces
+interface CardProps {
+  title: string;
+  description?: string;
+  onAction?: () => void;
+  class?: string;
+}
+
+// 3. Component Definition
+export const Card: Component<CardProps> = (props) => {
+  // 3.1 Hooks and Signals
+  const [isExpanded, setIsExpanded] = createSignal(false);
+  const { isDark } = useTheme();
+
+  // 3.2 Effects
+  createEffect(() => {
+    // Side effects here
+  });
+
+  // 3.3 Event Handlers
+  const handleClick = () => {
+    setIsExpanded(!isExpanded());
+    props.onAction?.();
+  };
+
+  // 3.4 Render
+  return (
+    <div 
+      class={clsx(
+        "rounded-lg p-4",
+        "bg-card text-card-foreground",
+        "transition-colors duration-200",
+        isDark() && "shadow-lg",
+        props.class
+      )}
+      role="article"
+    >
+      <h2 class="text-lg font-semibold">{props.title}</h2>
+      {props.description && (
+        <p class="mt-2 text-muted-foreground">{props.description}</p>
+      )}
+      <Button onClick={handleClick} class="mt-4">
+        {isExpanded() ? "Show Less" : "Show More"}
+      </Button>
+    </div>
+  );
+};
 ```
 
-Your app will be available at `http://localhost:3000` with hot reload enabled.
+### 2. Props Best Practices
 
-## Production Deployment 🚀
+```tsx
+// ✅ Good: Clear, typed props with defaults
+interface ButtonProps {
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
+  isLoading?: boolean;
+  disabled?: boolean;
+  children: JSX.Element;
+  onClick?: (e: MouseEvent) => void;
+}
 
-### Local Build
-```bash
-pnpm build
-pnpm serve  # To preview the production build
+// ❌ Bad: Untyped or overly permissive props
+interface BadProps {
+  style: any;  // Avoid 'any'
+  data: unknown;  // Too generic
+  onEvent: Function;  // Use specific function types
+}
 ```
 
-### Docker Production
-```bash
-docker compose up app-prod
+### 3. Composition Patterns
+
+```tsx
+// ✅ Good: Composable components
+export const Card: Component<CardProps> = (props) => (
+  <div class="card">
+    <CardHeader>{props.header}</CardHeader>
+    <CardContent>{props.children}</CardContent>
+    <CardFooter>{props.footer}</CardFooter>
+  </div>
+);
+
+// Usage
+<Card
+  header={<h2>Title</h2>}
+  footer={<Button>Action</Button>}
+>
+  <p>Content</p>
+</Card>
+
+// ❌ Bad: Monolithic components
+export const BadCard: Component = () => (
+  <div class="card">
+    <div class="header">
+      <h2>Hardcoded Title</h2>
+    </div>
+    <div class="content">
+      <p>Hardcoded content</p>
+    </div>
+  </div>
+);
 ```
 
-The production build will be available at `http://localhost:80`
+## 💻 Code Best Practices
 
-## Environment Variables 🔧
+### 1. State Management
 
-Copy `.env.template` to create your `.env` file:
+```tsx
+// ✅ Good: Organized store with typed state
+interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
-| Variable      | Description      | Default     |
-| ------------- | ---------------- | ----------- |
-| VITE_APP_PORT | Application port | 3000        |
-| VITE_APP_HOST | Application host | 0.0.0.0     |
-| NODE_ENV      | Environment mode | development |
+const [state, setState] = createSignal<AuthState>({
+  user: null,
+  isLoading: false,
+  error: null
+});
 
-## Available Scripts 📜
+export const useAuth = () => {
+  const login = async (credentials: LoginCredentials) => {
+    setState(prev => ({ ...prev, isLoading: true }));
+    try {
+      const user = await AuthService.login(credentials);
+      setState(prev => ({ ...prev, user, error: null }));
+    } catch (error) {
+      setState(prev => ({ 
+        ...prev, 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      }));
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
+    }
+  };
 
-| Command      | Description                     |
-| ------------ | ------------------------------- |
-| `pnpm dev`   | Start development server        |
-| `pnpm build` | Build for production            |
-| `pnpm serve` | Preview production build        |
-| `pnpm test`  | Run tests                       |
-| `dev.bat`    | Start dev environment (Windows) |
-| `dev.sh`     | Start dev environment (Unix)    |
+  return {
+    user: () => state().user,
+    isLoading: () => state().isLoading,
+    error: () => state().error,
+    login
+  };
+};
+```
 
-## Contributing 🤝
+### 2. Error Handling
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```tsx
+// ✅ Good: Proper error handling and loading states
+export const ProductList: Component = () => {
+  const { products, error, loading, fetchProducts } = useProducts();
+
+  return (
+    <div role="region" aria-label="Products">
+      {loading() && <LoadingSpinner />}
+      
+      {error() && (
+        <ErrorAlert 
+          message={error()} 
+          onRetry={fetchProducts}
+        />
+      )}
+      
+      {!loading() && !error() && products().length === 0 && (
+        <EmptyState message="No products found" />
+      )}
+      
+      {products().map(product => (
+        <ProductCard 
+          key={product.id}
+          product={product}
+        />
+      ))}
+    </div>
+  );
+};
+```
+
+### 3. Performance Optimization
+
+```tsx
+// ✅ Good: Optimized list rendering
+export const TodoList: Component<{ todos: Todo[] }> = (props) => {
+  // Memoize expensive computations
+  const completedCount = createMemo(() => 
+    props.todos.filter(todo => todo.completed).length
+  );
+
+  return (
+    <For each={props.todos}>
+      {(todo) => <TodoItem todo={todo} />}
+    </For>
+  );
+};
+
+// ❌ Bad: Unnecessary re-renders
+export const BadTodoList: Component<{ todos: Todo[] }> = (props) => (
+  <div>
+    {props.todos.map(todo => (
+      <div key={todo.id}>{todo.title}</div>
+    ))}
+  </div>
+);
+```
+
+### 4. Accessibility
+
+```tsx
+// ✅ Good: Accessible form component
+export const LoginForm: Component = () => {
+  const [error, setError] = createSignal("");
+
+  return (
+    <form
+      role="form"
+      aria-label="Login form"
+      onSubmit={handleSubmit}
+    >
+      <div role="group" aria-labelledby="credentials-heading">
+        <h2 id="credentials-heading" class="sr-only">
+          Login Credentials
+        </h2>
+
+        <Input
+          id="email"
+          type="email"
+          label="Email"
+          required
+          aria-required="true"
+          aria-invalid={!!error()}
+          aria-describedby={error() ? "email-error" : undefined}
+        />
+
+        {error() && (
+          <p
+            id="email-error"
+            class="text-destructive text-sm"
+            role="alert"
+          >
+            {error()}
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          aria-busy={loading()}
+          disabled={loading()}
+        >
+          {loading() ? "Logging in..." : "Login"}
+        </Button>
+      </div>
+    </form>
+  );
+};
+```
+
+## 🔧 Available Scripts
+
+- `pnpm dev` - Start development server
+- `pnpm build` - Build for production
+- `pnpm test` - Run tests
+- `pnpm lint` - Run linter
+- `pnpm format` - Format code
+
+## 📦 Dependencies
+
+- SolidJS - UI framework
+- Tailwind CSS - Styling
+- TypeScript - Type safety
+- Vite - Build tool
