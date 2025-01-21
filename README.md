@@ -455,3 +455,40 @@ export const LoginForm: Component = () => {
 - Tailwind CSS - Styling
 - TypeScript - Type safety
 - Vite - Build tool
+
+## Documentation
+
+### Router Configuration
+For detailed information about our routing setup and best practices, see [Router Documentation](src/docs/router.md).
+
+### Development
+
+#### Getting Started
+1. Install dependencies:
+```bash
+pnpm install
+```
+
+2. Start the development server:
+```bash
+pnpm dev
+```
+
+#### Building
+```bash
+pnpm build
+```
+
+### Project Structure
+- `/src` - Source code
+  - `/components` - Reusable components
+  - `/pages` - Page components
+  - `/stores` - State management
+  - `/lib` - Utilities and helpers
+  - `/docs` - Project documentation
+
+### Technologies
+- SolidJS
+- TailwindCSS
+- @solidjs/router
+- TypeScript

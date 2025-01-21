@@ -35,15 +35,15 @@ const sampleProducts = [
 
 export const FeatureShowcase: Component = () => {
 	const { setProducts } = useProducts();
-	const { cartItems, setCartItems } = useCart();
+	const { cartItems, addToCart, updateQuantity } = useCart();
 
 	// Initialize mock data with multiple products
 	onMount(() => {
 		setProducts(sampleProducts);
-		setCartItems([
-			{ id: sampleProducts[0].id, quantity: 1 },
-			{ id: sampleProducts[1].id, quantity: 2 },
-		]);
+		// Add initial cart items
+		addToCart(sampleProducts[0].id);
+		addToCart(sampleProducts[1].id);
+		updateQuantity(sampleProducts[1].id, 2);
 	});
 
 	return (

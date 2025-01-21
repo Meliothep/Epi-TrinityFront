@@ -1,13 +1,32 @@
-import { Component } from "solid-js";
+import { Component, Show, For } from "solid-js";
+import { A } from "@solidjs/router";
 import { clsx } from "../../lib/utils";
 import { ThemeToggle } from "../ui/ThemeToggle";
+import { useUI } from "../../stores/ui.store";
+import { Cart } from "../features/cart/Cart";
 
 interface HeaderProps {
 	class?: string;
 	sticky?: boolean;
 }
 
+interface NavLink {
+	href: string;
+	label: string;
+	end?: boolean;
+}
+
+const navLinks: NavLink[] = [
+	{ href: "/", label: "Home", end: true },
+	{ href: "/products", label: "Products" },
+	{ href: "/dashboard", label: "Dashboard" },
+	{ href: "/profile", label: "Profile" },
+	{ href: "/showcase", label: "Showcase" },
+];
+
 export const Header: Component<HeaderProps> = (props) => {
+	const { isMobileMenuOpen, toggleMobileMenu } = useUI();
+
 	return (
 		<header
 			class={clsx(
@@ -17,54 +36,123 @@ export const Header: Component<HeaderProps> = (props) => {
 				props.class
 			)}
 		>
-			<div class="container mx-auto px-4 h-16 flex items-center justify-between">
-				<div class="flex items-center space-x-4">
+			<div class="container mx-auto px-4">
+				<div class="relative flex h-16 items-center justify-between">
 					{/* Logo */}
-					<a
-						href="/"
-						class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent"
+					<div class="flex items-center">
+						<a
+							href="/"
+							class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent"
+							aria-label="Trinity - Home"
+						>
+							Trinity
+						</a>
+					</div>
+
+					{/* Desktop Navigation */}
+					<nav
+						class="hidden md:flex items-center space-x-6"
+						aria-label="Main navigation"
 					>
-						Trinity
-					</a>
+						<For each={navLinks}>
+							{(link: NavLink) => (
+								<A
+									href={link.href}
+									class="text-sm font-medium transition-colors hover:text-primary"
+									activeClass="text-primary"
+									end={link.end}
+									aria-current={link.end ? "page" : undefined}
+								>
+									{link.label}
+								</A>
+							)}
+						</For>
+						<div class="flex items-center space-x-4">
+							<Cart />
+							<ThemeToggle />
+						</div>
+					</nav>
+
+					{/* Mobile Menu Button */}
+					<div class="flex items-center space-x-4 md:hidden">
+						<Cart />
+						<button
+							type="button"
+							class="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent"
+							onClick={toggleMobileMenu}
+							aria-controls="mobile-menu"
+							aria-expanded={isMobileMenuOpen() ? "true" : "false"}
+							aria-label="Toggle mobile menu"
+						>
+							<span class="sr-only">Open main menu</span>
+							<Show
+								when={!isMobileMenuOpen()}
+								fallback={
+									<svg
+										class="h-6 w-6"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										aria-hidden="true"
+									>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											d="M6 18L18 6M6 6l12 12"
+										/>
+									</svg>
+								}
+							>
+								<svg
+									class="h-6 w-6"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+									/>
+								</svg>
+							</Show>
+						</button>
+					</div>
 				</div>
 
-				{/* Navigation */}
-				<nav class="hidden md:flex items-center space-x-6">
-					<a
-						href="/dashboard"
-						class="text-sm font-medium transition-colors hover:text-primary"
+				{/* Mobile Menu */}
+				<Show when={isMobileMenuOpen()}>
+					<div
+						id="mobile-menu"
+						class="md:hidden border-t border-border animate-in slide-in-from-top"
 					>
-						Dashboard
-					</a>
-					<a
-						href="/profile"
-						class="text-sm font-medium transition-colors hover:text-primary"
-					>
-						Profile
-					</a>
-					<ThemeToggle />
-				</nav>
-
-				{/* Mobile menu button */}
-				<button
-					class="md:hidden p-2 rounded-md hover:bg-accent"
-					aria-label="Toggle mobile menu"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="1.5"
-						stroke="currentColor"
-						class="w-6 h-6"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-						/>
-					</svg>
-				</button>
+						<nav
+							class="flex flex-col space-y-4 py-6"
+							aria-label="Mobile navigation"
+						>
+							<For each={navLinks}>
+								{(link: NavLink) => (
+									<A
+										href={link.href}
+										class="text-sm font-medium transition-colors hover:text-primary px-4"
+										activeClass="text-primary"
+										end={link.end}
+										aria-current={link.end ? "page" : undefined}
+										onClick={toggleMobileMenu}
+									>
+										{link.label}
+									</A>
+								)}
+							</For>
+							<div class="px-4">
+								<ThemeToggle />
+							</div>
+						</nav>
+					</div>
+				</Show>
 			</div>
 		</header>
 	);

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.15.3",
+    "solid-icons": "^1.1.0",
     "vite-template-solid": "file:"
   }
 }
