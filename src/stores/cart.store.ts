@@ -9,21 +9,31 @@ const [cartItems, setCartItems] = createSignal<CartItem[]>([]);
 
 export const useCart = () => {
 	const addToCart = (itemId: string) => {
-		// TODO: Implement add to cart
+		const existingItem = cartItems().find((item) => item.id === itemId);
+		if (existingItem) {
+			updateQuantity(itemId, existingItem.quantity + 1);
+		} else {
+			setCartItems([...cartItems(), { id: itemId, quantity: 1 }]);
+		}
 	};
 
 	const removeFromCart = (itemId: string) => {
-		// TODO: Implement remove from cart
+		setCartItems(cartItems().filter((item) => item.id !== itemId));
 	};
 
 	const updateQuantity = (itemId: string, quantity: number) => {
-		// TODO: Implement update quantity
+		setCartItems(
+			cartItems().map((item) =>
+				item.id === itemId ? { ...item, quantity } : item
+			)
+		);
 	};
 
 	return {
 		cartItems,
+		setCartItems,
 		addToCart,
 		removeFromCart,
-		updateQuantity
+		updateQuantity,
 	};
 }; 

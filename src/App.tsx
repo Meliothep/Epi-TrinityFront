@@ -1,12 +1,12 @@
 import { Component } from "solid-js";
 import { Router, Route } from "@solidjs/router";
-import { DemoFeatures } from "./components/features/demo/DemoFeatures";
 import { ComponentLibrary } from "./components/showcase/ComponentLibrary";
+import { FeatureShowcase } from "./components/features/demo/FeatureShowcase";
 
 const App: Component = () => {
 	return (
 		<Router>
-			<Route path="/" component={DemoFeatures} />
+			<Route path="/" component={FeatureShowcase} />
 			<Route path="/components" component={ComponentLibrary} />
 		</Router>
 	);
