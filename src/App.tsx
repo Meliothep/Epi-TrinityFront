@@ -1,8 +1,15 @@
 import { Component } from "solid-js";
-import { ComponentsShowcase } from "./components/features/demo/ComponentsShowcase";
+import { Router, Route } from "@solidjs/router";
+import { DemoFeatures } from "./components/features/demo/DemoFeatures";
+import { ComponentLibrary } from "./components/showcase/ComponentLibrary";
 
 const App: Component = () => {
-	return <ComponentsShowcase />;
+	return (
+		<Router>
+			<Route path="/" component={DemoFeatures} />
+			<Route path="/components" component={ComponentLibrary} />
+		</Router>
+	);
 };
 
 export default App;
