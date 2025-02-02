@@ -52,7 +52,7 @@ export const Header: Component<HeaderProps> = (props) => {
 
 					{/* Desktop Navigation */}
 					<nav
-						class={cn(styles.flex.center, "space-x-6")}
+						class={cn("hidden md:flex items-center space-x-6")}
 						aria-label="Main navigation"
 					>
 						<For each={navLinks}>
@@ -76,14 +76,13 @@ export const Header: Component<HeaderProps> = (props) => {
 						</div>
 					</nav>
 
-					{/* Mobile Menu Button */}
-					<div class={styles.flex.center}>
-						<Cart />
+					{/* Mobile Navigation Controls */}
+					<div class={cn("flex md:hidden items-center gap-2")}>
 						<button
 							type="button"
 							class={cn(
 								"inline-flex items-center justify-center rounded-md p-2 hover:bg-accent",
-								"md:hidden"
+								"text-foreground"
 							)}
 							onClick={toggleMobileMenu}
 							aria-controls="mobile-menu"
@@ -157,7 +156,8 @@ export const Header: Component<HeaderProps> = (props) => {
 									</A>
 								)}
 							</For>
-							<div class="px-4">
+							<div class={cn("flex items-center gap-4 px-4")}>
+								<Cart />
 								<ThemeToggle />
 							</div>
 						</nav>
