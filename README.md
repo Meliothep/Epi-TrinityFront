@@ -86,7 +86,168 @@ graph LR
     E --> F[UI Update]
 ```
 
-## 🚀 Getting Started
+## 🔌 Services & Mocking
+
+### Service Architecture
+
+The application uses a service layer pattern with mock capabilities for development and testing. The architecture is designed to easily switch between mock and real API implementations.
+
+```mermaid
+graph TD
+    A[Service Factory] --> B{Environment Check}
+    B -->|Development/Mock| C[Mock Service]
+    B -->|Production| D[API Service]
+    C --> E[Mock Data]
+    D --> F[Real API]
+```
+
+### Service Structure
+```
+services/
+├── api/                 # Real API implementations
+│   └── products.service.ts
+├── mock/               # Mock service implementations
+│   └── products.mock.service.ts
+├── service.factory.ts  # Service creation & configuration
+└── types/             # Service interfaces
+    └── services.ts
+```
+
+### Using Mock Services
+
+The mock service system provides:
+- Realistic API behavior simulation
+- Configurable network delays
+- Random error simulation
+- Type-safe implementations
+- Easy switching between mock and real APIs
+
+#### Configuration
+
+Mock services can be configured using environment variables:
+
+```env
+# Force mock service usage
+VITE_USE_MOCK=true
+
+# API configuration
+VITE_API_KEY=your_api_key
+```
+
+#### Environment-based Configuration
+
+```typescript
+// service.factory.ts
+const config = {
+    development: {
+        baseUrl: "http://localhost:3000/api"
+    },
+    staging: {
+        baseUrl: "https://staging-api.example.com"
+    },
+    production: {
+        baseUrl: "https://api.example.com"
+    }
+};
+```
+
+#### Mock Service Features
+
+1. **Simulated Network Behavior**
+   ```typescript
+   // Configurable delay simulation
+   await simulateDelay(500); // 500ms delay
+   
+   // Random error simulation (20% chance)
+   simulateError();
+   ```
+
+2. **Type-Safe Interface**
+   ```typescript
+   interface ProductService {
+       getProducts(): Promise<Product[]>;
+       getProduct(id: string): Promise<Product | null>;
+       searchProducts(query: string): Promise<Product[]>;
+   }
+   ```
+
+3. **Mock Data Management**
+   ```typescript
+   // mocks/products.mock.ts
+   export const mockProducts = [
+       {
+           id: "1",
+           name: "Product",
+           // ...
+       }
+   ];
+   ```
+
+### Switching to Real API
+
+To use the real API implementation:
+
+1. Set environment variables:
+   ```env
+   VITE_USE_MOCK=false
+   VITE_API_KEY=your_api_key
+   ```
+
+2. Update API configuration in `service.factory.ts`:
+   ```typescript
+   const config = {
+       production: {
+           baseUrl: "https://your-api-url.com"
+       }
+   };
+   ```
+
+3. The application will automatically use the real API service with no component changes needed.
+
+### Best Practices
+
+1. **Service Usage in Stores**
+   ```typescript
+   const productService = createProductService();
+   
+   export const useProducts = () => {
+       const fetchProducts = async () => {
+           try {
+               const products = await productService.getProducts();
+               // Handle success
+           } catch (error) {
+               // Handle error
+           }
+       };
+       // ...
+   };
+   ```
+
+2. **Error Handling**
+   ```typescript
+   try {
+       await productService.getProduct(id);
+   } catch (error) {
+       if (error instanceof ApiError) {
+           // Handle API-specific error
+       }
+       // Handle general error
+   }
+   ```
+
+3. **Testing with Mocks**
+   ```typescript
+   // Force mock service in tests
+   process.env.VITE_USE_MOCK = "true";
+   
+   test("fetches products", async () => {
+       const service = createProductService();
+       const products = await service.getProducts();
+       expect(products).toBeDefined();
+   });
+   ```
+
+## �� Getting Started
 
 1. Clone the repository:
    ```bash

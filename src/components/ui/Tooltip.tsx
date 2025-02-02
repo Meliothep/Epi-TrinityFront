@@ -8,7 +8,7 @@ import {
 	splitProps,
 } from "solid-js";
 import { Portal } from "solid-js/web";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 
 interface TooltipProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	content: JSX.Element;
@@ -79,6 +79,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
 				onMouseLeave={handleMouseLeave}
 				onFocus={handleMouseEnter}
 				onBlur={handleMouseLeave}
+				class={cn("relative inline-block", local.class)}
 			>
 				{local.children}
 			</div>
@@ -93,8 +94,8 @@ export const Tooltip: Component<TooltipProps> = (props) => {
 							left: `${coords().x}px`,
 							top: `${coords().y}px`,
 						}}
-						class={clsx(
-							"z-50 rounded-md bg-foreground px-3 py-1.5 text-sm text-background shadow-md",
+						class={cn(
+							"absolute z-50 rounded-md bg-foreground px-3 py-1.5 text-sm text-background shadow-md",
 							positions[local.position || "top"],
 							local.class
 						)}

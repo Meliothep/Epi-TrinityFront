@@ -5,6 +5,7 @@ import { Header } from "./components/layout/Header";
 // Lazy load page components
 const Home = lazy(() => import("./pages/Home"));
 const Products = lazy(() => import("./pages/Products"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -25,6 +26,7 @@ export const App: Component = () => {
 		<Router root={RootLayout}>
 			<Route path="/" component={Home} />
 			<Route path="/products" component={Products} />
+			<Route path="/products/:id" component={ProductDetail} />
 			<Route path="/dashboard" component={Dashboard} />
 			<Route path="/profile" component={Profile} />
 			<Route path="/showcase" component={Showcase} />

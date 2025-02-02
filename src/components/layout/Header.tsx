@@ -1,6 +1,7 @@
 import { Component, Show, For } from "solid-js";
 import { A } from "@solidjs/router";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
+import { styles } from "../../lib/styles";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { useUI } from "../../stores/ui.store";
 import { Cart } from "../features/cart/Cart";
@@ -29,7 +30,7 @@ export const Header: Component<HeaderProps> = (props) => {
 
 	return (
 		<header
-			class={clsx(
+			class={cn(
 				"w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
 				"border-b border-border",
 				props.sticky && "sticky top-0 z-50",
@@ -39,27 +40,29 @@ export const Header: Component<HeaderProps> = (props) => {
 			<div class="container mx-auto px-4">
 				<div class="relative flex h-16 items-center justify-between">
 					{/* Logo */}
-					<div class="flex items-center">
-						<a
+					<div class={styles.flex.start}>
+						<A
 							href="/"
 							class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent"
 							aria-label="Trinity - Home"
 						>
 							Trinity
-						</a>
+						</A>
 					</div>
 
 					{/* Desktop Navigation */}
 					<nav
-						class="hidden md:flex items-center space-x-6"
+						class={cn(styles.flex.center, "space-x-6")}
 						aria-label="Main navigation"
 					>
 						<For each={navLinks}>
 							{(link: NavLink) => (
 								<A
 									href={link.href}
-									class="text-sm font-medium transition-colors hover:text-primary"
-									activeClass="text-primary"
+									class={cn(
+										"text-sm font-medium transition-colors hover:text-primary",
+										"data-[active]:text-primary"
+									)}
 									end={link.end}
 									aria-current={link.end ? "page" : undefined}
 								>
@@ -67,18 +70,21 @@ export const Header: Component<HeaderProps> = (props) => {
 								</A>
 							)}
 						</For>
-						<div class="flex items-center space-x-4">
+						<div class={styles.flex.center}>
 							<Cart />
 							<ThemeToggle />
 						</div>
 					</nav>
 
 					{/* Mobile Menu Button */}
-					<div class="flex items-center space-x-4 md:hidden">
+					<div class={styles.flex.center}>
 						<Cart />
 						<button
 							type="button"
-							class="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent"
+							class={cn(
+								"inline-flex items-center justify-center rounded-md p-2 hover:bg-accent",
+								"md:hidden"
+							)}
 							onClick={toggleMobileMenu}
 							aria-controls="mobile-menu"
 							aria-expanded={isMobileMenuOpen() ? "true" : "false"}
@@ -127,18 +133,22 @@ export const Header: Component<HeaderProps> = (props) => {
 				<Show when={isMobileMenuOpen()}>
 					<div
 						id="mobile-menu"
-						class="md:hidden border-t border-border animate-in slide-in-from-top"
+						class={cn(
+							"md:hidden border-t border-border animate-in slide-in-from-top"
+						)}
 					>
 						<nav
-							class="flex flex-col space-y-4 py-6"
+							class={cn("flex flex-col space-y-4 py-6")}
 							aria-label="Mobile navigation"
 						>
 							<For each={navLinks}>
 								{(link: NavLink) => (
 									<A
 										href={link.href}
-										class="text-sm font-medium transition-colors hover:text-primary px-4"
-										activeClass="text-primary"
+										class={cn(
+											"text-sm font-medium transition-colors hover:text-primary px-4",
+											"data-[active]:text-primary"
+										)}
 										end={link.end}
 										aria-current={link.end ? "page" : undefined}
 										onClick={toggleMobileMenu}
