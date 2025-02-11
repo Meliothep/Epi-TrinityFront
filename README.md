@@ -23,6 +23,20 @@ A modern, accessible, and dark-mode compatible SolidJS application with a compon
 - 🎯 Component-driven development
 - 🔄 Efficient state management
 - 🚀 Fast development workflow
+- ✨ Smooth, accessible animations with tailwindcss-motion
+
+### 🎭 Animation System
+
+Trinity uses the `tailwindcss-motion` plugin to provide smooth, performant, and accessible animations throughout the application. Key features include:
+
+- **Base Animations**: Fade, slide, scale, and rotate animations with configurable parameters
+- **Animation Presets**: Common patterns like pulse, bounce, and slide-up for quick implementation
+- **Modifiers**: Control duration, delay, easing, and loop behavior
+- **Property-Specific Control**: Apply different timing to different properties
+- **Accessibility**: Automatic reduced motion support
+- **Performance**: Hardware-accelerated animations by default
+
+For detailed examples and best practices, see the [Animation System Guide](FEATURES_GUIDE.md#-animation-system).
 
 ## 🏗 Project Structure
 
@@ -73,373 +87,267 @@ graph TD
     end
 ```
 
-## 🔄 State Management Flow
+## 🎭 Animation System
 
-```mermaid
-graph LR
-    A[User Action] --> B[Store]
-    B --> C[Service]
-    C --> D[API]
-    D --> C
-    C --> B
-    B --> E[Components]
-    E --> F[UI Update]
-```
+Trinity uses the `tailwindcss-motion` plugin for smooth, accessible animations:
 
-## 🚀 Getting Started
+### Key Features
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/trinity-frontend.git
-   ```
+- 🎨 Motion-safe animations that respect user preferences
+- 🔄 Smooth transitions and transforms
+- ⚡ Performance-optimized animations
+- 🎯 Component-specific animation patterns
+- 📱 Mobile-friendly animations
+- ♿ Accessibility-first approach
 
-2. Install dependencies:
-   ```bash
-   pnpm install
-   ```
-
-3. Start the development server:
-   ```bash
-   # Windows
-   .\dev.bat
-
-   # Unix/MacOS
-   chmod +x dev.sh  # First time only
-   ./dev.sh
-   ```
-
-The app will be available at `http://localhost:3000` with hot reload enabled.
-
-## 💻 Development
-
-### Component Structure
-
-Each component follows a consistent structure:
-- Props interface
-- Component implementation
-- Styles (Tailwind classes)
-- Dark mode support
-- Accessibility features
-
-Example:
-```tsx
-interface ButtonProps {
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
-}
-
-export const Button: Component<ButtonProps> = (props) => {
-  // Component implementation
-};
-```
-
-### State Management
-
-We use Solid.js signals for state management:
-```tsx
-// Store definition
-const [state, setState] = createSignal(initialValue);
-
-// Component usage
-const Component = () => {
-  const store = useStore();
-  return <div>{store.value()}</div>;
-};
-```
-
-## 📚 Best Practices
-
-1. **Component Organization**
-   - Keep components small and focused
-   - Use composition over inheritance
-   - Follow the Single Responsibility Principle
-
-2. **State Management**
-   - Use local state when possible
-   - Centralize shared state in stores
-   - Keep state updates predictable
-
-3. **Styling**
-   - Use Tailwind CSS utility classes
-   - Follow design system tokens
-   - Ensure dark mode compatibility
-
-4. **Performance**
-   - Lazy load routes and components
-   - Optimize re-renders
-   - Use proper memoization
-
-5. **Accessibility**
-   - Include proper ARIA attributes
-   - Ensure keyboard navigation
-   - Maintain proper contrast ratios
-
-## 🎯 Component Best Practices
-
-### 1. Component Structure
+### Example Usage
 
 ```tsx
-// 1. Imports
-import { Component, createSignal, createEffect } from "solid-js";
-import { useTheme } from "../../stores/theme";
-import { Button } from "../ui/Button";
+// Fade in with duration
+<div class="motion-safe:animate-fade-in motion-safe:animate-duration-300">
+  {/* Content */}
+</div>
 
-// 2. Types/Interfaces
-interface CardProps {
-  title: string;
-  description?: string;
-  onAction?: () => void;
-  class?: string;
-}
+// Slide in from right
+<div class="motion-safe:animate-slide-in-right motion-safe:animate-duration-300">
+  {/* Content */}
+</div>
 
-// 3. Component Definition
-export const Card: Component<CardProps> = (props) => {
-  // 3.1 Hooks and Signals
-  const [isExpanded, setIsExpanded] = createSignal(false);
-  const { isDark } = useTheme();
+// Interactive hover states
+<button class="motion-safe:hover:scale-105 motion-safe:active:scale-95 transition-transform duration-200">
+  Click me
+</button>
 
-  // 3.2 Effects
-  createEffect(() => {
-    // Side effects here
-  });
-
-  // 3.3 Event Handlers
-  const handleClick = () => {
-    setIsExpanded(!isExpanded());
-    props.onAction?.();
-  };
-
-  // 3.4 Render
-  return (
-    <div 
-      class={clsx(
-        "rounded-lg p-4",
-        "bg-card text-card-foreground",
-        "transition-colors duration-200",
-        isDark() && "shadow-lg",
-        props.class
-      )}
-      role="article"
+// Staggered list animations
+<For each={items}>
+  {(item, index) => (
+    <div
+      class="motion-safe:animate-fade-in motion-safe:animate-duration-300"
+      style={{ "--delay": `${index() * 100}ms` }}
     >
-      <h2 class="text-lg font-semibold">{props.title}</h2>
-      {props.description && (
-        <p class="mt-2 text-muted-foreground">{props.description}</p>
-      )}
-      <Button onClick={handleClick} class="mt-4">
-        {isExpanded() ? "Show Less" : "Show More"}
-      </Button>
+      {item}
     </div>
-  );
+  )}
+</For>
+```
+
+### Animation Best Practices
+
+1. Use `motion-safe:` prefix for all animations
+2. Keep animations subtle and purposeful
+3. Provide fallbacks for users with reduced motion
+4. Use transform and opacity for better performance
+5. Implement consistent timing across the app
+
+For detailed animation documentation, see [Animation Guide](docs/FEATURES_GUIDE.md#animation-system).
+
+## 🎭 State Management
+
+We use a custom store implementation with SolidJS signals that ensures proper reactive context handling:
+
+```typescript
+// Store Implementation Pattern
+// 1. State Signals
+const [state, setState] = createSignal(initialState);
+
+// 2. Actions
+const actions = {
+  updateState: (newState) => setState(prev => ({ ...prev, ...newState }))
 };
-```
 
-### 2. Props Best Practices
+// 3. Persistence Hook (used within components)
+export const usePersistentStore = () => {
+  createEffect(() => {
+    // Persist state changes
+    localStorage.setItem('store-key', JSON.stringify(state()));
+  });
+};
 
-```tsx
-// ✅ Good: Clear, typed props with defaults
-interface ButtonProps {
-  variant?: "primary" | "secondary" | "outline";
-  size?: "sm" | "md" | "lg";
-  isLoading?: boolean;
-  disabled?: boolean;
-  children: JSX.Element;
-  onClick?: (e: MouseEvent) => void;
-}
-
-// ❌ Bad: Untyped or overly permissive props
-interface BadProps {
-  style: any;  // Avoid 'any'
-  data: unknown;  // Too generic
-  onEvent: Function;  // Use specific function types
-}
-```
-
-### 3. Composition Patterns
-
-```tsx
-// ✅ Good: Composable components
-export const Card: Component<CardProps> = (props) => (
-  <div class="card">
-    <CardHeader>{props.header}</CardHeader>
-    <CardContent>{props.children}</CardContent>
-    <CardFooter>{props.footer}</CardFooter>
-  </div>
-);
-
-// Usage
-<Card
-  header={<h2>Title</h2>}
-  footer={<Button>Action</Button>}
->
-  <p>Content</p>
-</Card>
-
-// ❌ Bad: Monolithic components
-export const BadCard: Component = () => (
-  <div class="card">
-    <div class="header">
-      <h2>Hardcoded Title</h2>
-    </div>
-    <div class="content">
-      <p>Hardcoded content</p>
-    </div>
-  </div>
-);
-```
-
-## 💻 Code Best Practices
-
-### 1. State Management
-
-```tsx
-// ✅ Good: Organized store with typed state
-interface AuthState {
-  user: User | null;
-  isLoading: boolean;
-  error: string | null;
-}
-
-const [state, setState] = createSignal<AuthState>({
-  user: null,
-  isLoading: false,
-  error: null
+// 4. Store Hook
+export const useStore = () => ({
+  // Getters
+  state,
+  // Actions
+  ...actions
 });
 
-export const useAuth = () => {
-  const login = async (credentials: LoginCredentials) => {
-    setState(prev => ({ ...prev, isLoading: true }));
-    try {
-      const user = await AuthService.login(credentials);
-      setState(prev => ({ ...prev, user, error: null }));
-    } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        error: error instanceof Error ? error.message : "Unknown error" 
-      }));
-    } finally {
-      setState(prev => ({ ...prev, isLoading: false }));
+// Usage in components:
+const Component = () => {
+  const store = useStore();
+  // Initialize persistence if needed
+  usePersistentStore();
+  
+  return <div>{store.state()}</div>;
+};
+```
+
+Key Features:
+- 🔄 Reactive state management with SolidJS signals
+- 💾 Optional state persistence
+- 🔒 Type-safe implementation
+- ⚡ Proper reactive context handling
+- 🧩 Modular and composable
+
+## 🔌 Services & Mocking
+
+### Service Architecture
+
+The application uses a service layer pattern with mock capabilities for development and testing. The architecture is designed to easily switch between mock and real API implementations.
+
+```mermaid
+graph TD
+    A[Service Factory] --> B{Environment Check}
+    B -->|Development/Mock| C[Mock Service]
+    B -->|Production| D[API Service]
+    C --> E[Mock Data]
+    D --> F[Real API]
+```
+
+### Service Structure
+```
+services/
+├── api/                 # Real API implementations
+│   └── products.service.ts
+├── mock/               # Mock service implementations
+│   └── products.mock.service.ts
+├── service.factory.ts  # Service creation & configuration
+└── types/             # Service interfaces
+    └── services.ts
+```
+
+### Using Mock Services
+
+The mock service system provides:
+- Realistic API behavior simulation
+- Configurable network delays
+- Random error simulation
+- Type-safe implementations
+- Easy switching between mock and real APIs
+
+#### Configuration
+
+Mock services can be configured using environment variables:
+
+```env
+# Force mock service usage
+VITE_USE_MOCK=true
+
+# API configuration
+VITE_API_KEY=your_api_key
+```
+
+#### Environment-based Configuration
+
+```typescript
+// service.factory.ts
+const config = {
+    development: {
+        baseUrl: "http://localhost:3000/api"
+    },
+    staging: {
+        baseUrl: "https://staging-api.example.com"
+    },
+    production: {
+        baseUrl: "https://api.example.com"
     }
-  };
-
-  return {
-    user: () => state().user,
-    isLoading: () => state().isLoading,
-    error: () => state().error,
-    login
-  };
 };
 ```
 
-### 2. Error Handling
+#### Mock Service Features
 
-```tsx
-// ✅ Good: Proper error handling and loading states
-export const ProductList: Component = () => {
-  const { products, error, loading, fetchProducts } = useProducts();
+1. **Simulated Network Behavior**
+   ```typescript
+   // Configurable delay simulation
+   await simulateDelay(500); // 500ms delay
+   
+   // Random error simulation (20% chance)
+   simulateError();
+   ```
 
-  return (
-    <div role="region" aria-label="Products">
-      {loading() && <LoadingSpinner />}
-      
-      {error() && (
-        <ErrorAlert 
-          message={error()} 
-          onRetry={fetchProducts}
-        />
-      )}
-      
-      {!loading() && !error() && products().length === 0 && (
-        <EmptyState message="No products found" />
-      )}
-      
-      {products().map(product => (
-        <ProductCard 
-          key={product.id}
-          product={product}
-        />
-      ))}
-    </div>
-  );
-};
-```
+2. **Type-Safe Interface**
+   ```typescript
+   interface ProductService {
+       getProducts(): Promise<Product[]>;
+       getProduct(id: string): Promise<Product | null>;
+       searchProducts(query: string): Promise<Product[]>;
+   }
+   ```
 
-### 3. Performance Optimization
+3. **Mock Data Management**
+   ```typescript
+   // mocks/products.mock.ts
+   export const mockProducts = [
+       {
+           id: "1",
+           name: "Product",
+           // ...
+       }
+   ];
+   ```
 
-```tsx
-// ✅ Good: Optimized list rendering
-export const TodoList: Component<{ todos: Todo[] }> = (props) => {
-  // Memoize expensive computations
-  const completedCount = createMemo(() => 
-    props.todos.filter(todo => todo.completed).length
-  );
+### Switching to Real API
 
-  return (
-    <For each={props.todos}>
-      {(todo) => <TodoItem todo={todo} />}
-    </For>
-  );
-};
+To use the real API implementation:
 
-// ❌ Bad: Unnecessary re-renders
-export const BadTodoList: Component<{ todos: Todo[] }> = (props) => (
-  <div>
-    {props.todos.map(todo => (
-      <div key={todo.id}>{todo.title}</div>
-    ))}
-  </div>
-);
-```
+1. Set environment variables:
+   ```env
+   VITE_USE_MOCK=false
+   VITE_API_KEY=your_api_key
+   ```
 
-### 4. Accessibility
+2. Update API configuration in `service.factory.ts`:
+   ```typescript
+   const config = {
+       production: {
+           baseUrl: "https://your-api-url.com"
+       }
+   };
+   ```
 
-```tsx
-// ✅ Good: Accessible form component
-export const LoginForm: Component = () => {
-  const [error, setError] = createSignal("");
+3. The application will automatically use the real API service with no component changes needed.
 
-  return (
-    <form
-      role="form"
-      aria-label="Login form"
-      onSubmit={handleSubmit}
-    >
-      <div role="group" aria-labelledby="credentials-heading">
-        <h2 id="credentials-heading" class="sr-only">
-          Login Credentials
-        </h2>
+### Best Practices
 
-        <Input
-          id="email"
-          type="email"
-          label="Email"
-          required
-          aria-required="true"
-          aria-invalid={!!error()}
-          aria-describedby={error() ? "email-error" : undefined}
-        />
+1. **Service Usage in Stores**
+   ```typescript
+   const productService = createProductService();
+   
+   export const useProducts = () => {
+       const fetchProducts = async () => {
+           try {
+               const products = await productService.getProducts();
+               // Handle success
+           } catch (error) {
+               // Handle error
+           }
+       };
+       // ...
+   };
+   ```
 
-        {error() && (
-          <p
-            id="email-error"
-            class="text-destructive text-sm"
-            role="alert"
-          >
-            {error()}
-          </p>
-        )}
+2. **Error Handling**
+   ```typescript
+   try {
+       await productService.getProduct(id);
+   } catch (error) {
+       if (error instanceof ApiError) {
+           // Handle API-specific error
+       }
+       // Handle general error
+   }
+   ```
 
-        <Button
-          type="submit"
-          aria-busy={loading()}
-          disabled={loading()}
-        >
-          {loading() ? "Logging in..." : "Login"}
-        </Button>
-      </div>
-    </form>
-  );
-};
-```
+3. **Testing with Mocks**
+   ```typescript
+   // Force mock service in tests
+   process.env.VITE_USE_MOCK = "true";
+   
+   test("fetches products", async () => {
+       const service = createProductService();
+       const products = await service.getProducts();
+       expect(products).toBeDefined();
+   });
+   ```
 
 ## 🔧 Available Scripts
 
@@ -492,3 +400,149 @@ pnpm build
 - TailwindCSS
 - @solidjs/router
 - TypeScript
+
+# Trinity E-commerce Platform
+
+A modern e-commerce platform built with SolidJS, focusing on healthy food products with nutrition information.
+
+## Test Users & Access Levels
+
+For testing purposes, the following user accounts are available:
+
+### Super Admin
+- **Email:** admin@trinity.com
+- **Password:** admin123
+- **Access Level:** Full system access
+- **Capabilities:**
+  - ✅ Access admin dashboard
+  - ✅ Manage all users (create, edit, delete)
+  - ✅ Manage products (create, edit, delete)
+  - ✅ Manage orders
+  - ✅ Access system settings
+  - ✅ Create other admin users
+  - ✅ Access all user features
+  - ✅ Modify system configurations
+
+### Store Admin
+- **Email:** manager@trinity.com
+- **Password:** manager123
+- **Access Level:** Limited administrative access
+- **Capabilities:**
+  - ✅ Access admin dashboard
+  - ✅ View users
+  - ✅ Manage products (create, edit)
+  - ✅ Manage orders
+  - ✅ View settings
+  - ❌ Create/delete admin users
+  - ❌ Modify system configurations
+  - ✅ Access all user features
+
+### Regular User
+- **Email:** user@trinity.com
+- **Password:** user123
+- **Access Level:** Standard user access
+- **Capabilities:**
+  - ✅ View products
+  - ✅ Place orders
+  - ✅ Manage own profile
+  - ✅ View order history
+  - ✅ Access shopping cart
+  - ❌ Access admin features
+  - ❌ Modify system settings
+
+### Inactive User
+- **Email:** inactive@trinity.com
+- **Password:** inactive123
+- **Access Level:** No access (disabled account)
+- **Capabilities:**
+  - ❌ Cannot log in
+  - ❌ No access to any features
+  - ℹ️ Will receive "Account is inactive" message
+
+## Available Routes
+
+### Public Routes
+- `/` - Home page
+- `/products` - Product listing
+- `/categories` - Product categories
+- `/products/:id` - Product details
+- `/login` - Login page
+- `/register` - Registration page
+- `/showcase` - Component showcase and test user interface
+
+### Protected Routes (Requires Authentication)
+- `/dashboard` - User dashboard
+- `/profile` - User profile management
+- `/orders` - Order history
+- `/checkout` - Checkout process
+
+### Admin Routes (Requires Admin Access)
+- `/admin` - Admin dashboard
+- `/admin/users` - User management
+- `/admin/products` - Product management
+- `/admin/orders` - Order management
+- `/admin/settings` - System settings
+
+## Testing the Different Roles
+
+1. Visit the `/showcase` page to access the role testing interface
+2. Use the provided test accounts to log in with different roles
+3. Observe how the UI and available features change based on the user's role
+4. Test accessing different routes to verify permission enforcement
+
+### Role-Based Access Control
+
+The system implements the following access control features:
+- Automatic redirect to login for unauthenticated users
+- Route protection based on user roles
+- Dynamic UI adaptation based on permissions
+- Proper error handling for unauthorized access
+- Session management with "remember me" functionality
+
+### Testing Notes
+
+1. **Super Admin Testing:**
+   - Can access all features
+   - Test user creation and role assignment
+   - Verify system settings modifications
+
+2. **Store Admin Testing:**
+   - Verify limited admin capabilities
+   - Test product management features
+   - Confirm restricted access to sensitive settings
+
+3. **Regular User Testing:**
+   - Verify standard e-commerce functionality
+   - Test order placement and history
+   - Confirm admin route restrictions
+
+4. **Inactive User Testing:**
+   - Verify login restrictions
+   - Test error message display
+   - Confirm account status handling
+
+## Security Features
+
+- Role-based access control (RBAC)
+- Session management
+- Secure route protection
+- Password validation
+- Account status checking
+- Error handling for unauthorized access
+
+## Development Notes
+
+- All test users are part of the mock authentication system
+- User data persists in localStorage for testing
+- Password validation requires minimum 6 characters
+- Session tokens expire after 24 hours
+- "Remember me" functionality available for persistent login
+
+## Additional Information
+
+For more detailed information about specific features or implementation details, please refer to the following documentation:
+- [Authentication System](./docs/auth.md)
+- [Admin Features](./docs/admin.md)
+- [User Management](./docs/users.md)
+- [Product System](./docs/products.md)
+- [Order Processing](./docs/orders.md)

@@ -1,0 +1,42 @@
+{
+    "id": "00000001",
+    "code": "00000001", // TODO: No Need
+    "product_name": "Yogurt Smoothie", 
+    "quantity": "300g",
+    "brands": ["YAMI", "Selbst gemacht"], // TODO: Back List
+    "categories": ["supplements"], // TODO: Back List
+    "categories_tags": ["en:supplements"], // TODO: No Need
+    "categories_en": ["Supplements"], // TODO: No Need
+    "origins": ["Germany"], // TODO: Back List
+    "labels": ["No gluten", "Vegetarian", "No artificial flavors", "Vegan", "Made in Germany", "No lactose", "EU Organic"],
+    "labels_tags": ["en:no-gluten", "en:organic", "en:vegetarian", "en:eu-organic", "en:no-artificial-flavors", "en:vegan", "en:made-in-germany", "en:no-lactose"], // TODO: No Need
+    "labels_en": ["No gluten", "Organic", "Vegetarian", "EU Organic", "No artificial flavors", "Vegan", "Made in Germany", "No lactose"], // TODO: No Need
+    "allergens": ["en:blanches-almonds", "en:nut", "en:tree-nut", "en:almond"], // TODO: Back List
+    "ingredients_text": "Mandeln blanchiert",
+    "nutrition": {
+        "energy_kcal_100g": 48,
+        "energy_kj_100g": 201,
+        "proteins_100g": 0.8,
+        "carbohydrates_100g": 8.8,
+        "sugars_100g": 6.4,
+        "fat_100g": 0.6,
+        "saturated_fat_100g": 0.4,
+        "fiber_100g": 0,
+        "salt_100g": 0.036,
+        "sodium_100g": 0.00009
+    },
+    "nutrition_grade": "b",
+    "nova_group": 1, // TODO: No Need
+    "image_url": "https://images.openfoodfacts.org/images/products/000/000/000/0001/front_en.193.400.jpg",
+    "image_small_url": "https://images.openfoodfacts.org/images/products/000/000/000/0001/front_en.193.200.jpg", // TODO: No Need
+    "image_ingredients_url": "https://images.openfoodfacts.org/images/products/000/000/000/0001/ingredients_en.195.400.jpg", // TODO: No Need
+    "image_nutrition_url": "https://images.openfoodfacts.org/images/products/000/000/000/0001/nutrition_en.198.400.jpg", // TODO: No Need
+    "created_t": 1634745456, // TODO: put in dto
+    "last_modified_t": 1738028711, // TODO: put in dto
+    "serving_size": "250g", // TODO: No Need
+    "serving_quantity": 250, // TODO: No Need
+    "states_tags": ["en:to-be-completed", "en:nutrition-facts-completed"], // TODO: No Need
+    "states_en": ["To be completed", "Nutrition facts completed"], // TODO: No Need
+    "main_category": "en:supplements",
+    "main_category_en": "Supplements" // TODO: No Need
+}

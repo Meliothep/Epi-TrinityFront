@@ -1,7 +1,9 @@
-import { Component } from "solid-js";
+import { Component, Show, createMemo } from "solid-js";
 import { Button } from "../../ui/Button";
 import { useProducts } from "../../../stores/products.store";
-import { cartStore } from "../../../stores/cart.store";
+import { useCart } from "../../../stores/cart.store";
+import { formatCurrency } from "../../../lib/format";
+import { getFallbackImageUrl, cn } from "../../../lib/utils";
 
 interface CartItemProps {
 	itemId: string;
@@ -9,77 +11,164 @@ interface CartItemProps {
 }
 
 export const CartItem: Component<CartItemProps> = (props) => {
-	const { products } = useProducts();
-	const product = () => products().find((p) => p.id === props.itemId);
+	const { getProduct, products } = useProducts();
+	const cart = useCart();
+
+	// Create memoized product data
+	const product = createMemo(() => {
+		const currentProducts = products();
+		if (!currentProducts) return null;
+		return currentProducts.find((p) => p.id === props.itemId);
+	});
+
+	// Create memoized price calculation
+	const price = createMemo(() => {
+		const currentProduct = product();
+		if (!currentProduct?.price) return 0;
+		return currentProduct.price * props.quantity;
+	});
+
+	const handleDecrement = () => {
+		cart.updateQuantity(props.itemId, props.quantity - 1);
+	};
+
+	const handleIncrement = () => {
+		cart.updateQuantity(props.itemId, props.quantity + 1);
+	};
+
+	const handleRemove = () => {
+		cart.removeFromCart(props.itemId);
+	};
 
 	return (
-		<div class="flex items-center gap-4 py-4 border-b border-border last:border-0">
-			{/* Product Image */}
-			<div class="w-20 h-20 rounded-md overflow-hidden bg-accent/10">
-				<img
-					src={product()?.image || "https://via.placeholder.com/80"}
-					alt={product()?.name}
-					class="w-full h-full object-cover"
-				/>
-			</div>
-
-			{/* Product Details */}
-			<div class="flex-1 min-w-0">
-				<h3 class="text-sm font-medium truncate">{product()?.name}</h3>
-				<p class="text-sm text-muted-foreground mt-1">
-					${product()?.price?.toFixed(2)}
-				</p>
-			</div>
-
-			{/* Quantity Controls */}
-			<div class="flex items-center gap-2">
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() =>
-						cartStore.updateQuantity(props.itemId, props.quantity - 1)
+		<div
+			class={cn(
+				"flex items-center space-x-4 py-4",
+				"motion-safe:hover:bg-accent/5 rounded-lg transition-colors duration-200",
+				"motion-safe:animate-fade-in motion-safe:animate-duration-300"
+			)}
+		>
+			<div
+				class={cn(
+					"relative h-16 w-16 overflow-hidden rounded-lg border bg-muted",
+					"motion-safe:hover:scale-105 transition-transform duration-200"
+				)}
+			>
+				<Show
+					when={product()}
+					fallback={
+						<div class="h-full w-full bg-muted flex items-center justify-center motion-safe:animate-pulse">
+							<span class="text-muted-foreground text-xs">Loading...</span>
+						</div>
 					}
-					aria-label="Decrease quantity"
-					class="h-8 w-8 p-0"
 				>
-					-
-				</Button>
-
-				<span class="w-8 text-center text-sm">{props.quantity}</span>
-
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() =>
-						cartStore.updateQuantity(props.itemId, props.quantity + 1)
+					<img
+						src={product()?.image || getFallbackImageUrl("Product")}
+						alt={product()?.name || "Product"}
+						class={cn(
+							"h-full w-full object-cover",
+							"motion-safe:animate-fade-in motion-safe:animate-duration-500"
+						)}
+						onError={(e) => {
+							const target = e.target as HTMLImageElement;
+							target.src = getFallbackImageUrl(product()?.name || "Product");
+						}}
+					/>
+				</Show>
+			</div>
+			<div class="flex-1">
+				<Show
+					when={product()}
+					fallback={
+						<div class="space-y-2">
+							<div class="h-4 w-24 bg-muted rounded motion-safe:animate-pulse" />
+							<div class="h-4 w-16 bg-muted rounded motion-safe:animate-pulse" />
+						</div>
 					}
-					aria-label="Increase quantity"
-					class="h-8 w-8 p-0"
 				>
-					+
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="l"
-					class="text-destructive hover:text-destructive/90 h-8 w-8 p-0"
-					onClick={() => cartStore.removeFromCart(props.itemId)}
-					aria-label="Remove item"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						viewBox="0 0 20 20"
-						fill="currentColor"
-						class="w-4 h-4"
+					<h3 class="font-medium motion-safe:animate-fade-down motion-safe:animate-duration-500">
+						{product()?.name}
+					</h3>
+					<div class="flex items-center space-x-2 motion-safe:animate-fade-up motion-safe:animate-duration-500 motion-safe:animate-delay-100">
+						<p class="text-sm text-muted-foreground">
+							{formatCurrency(product()?.price || 0)} × {props.quantity}
+						</p>
+						<p class="text-sm font-medium">= {formatCurrency(price())}</p>
+					</div>
+				</Show>
+				<div class="mt-2 flex items-center space-x-2">
+					<Button
+						variant="outline"
+						size="icon"
+						class={cn(
+							"h-8 w-8",
+							"motion-safe:hover:scale-110 motion-safe:active:scale-95",
+							"transition-transform duration-200"
+						)}
+						onClick={handleDecrement}
+						disabled={props.quantity <= 1}
 					>
-						<path
-							fill-rule="evenodd"
-							d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-				</Button>
+						<span class="sr-only">Decrease quantity</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M5 12h14" />
+						</svg>
+					</Button>
+					<span class="w-8 text-center motion-safe:animate-fade-in motion-safe:animate-duration-200">
+						{props.quantity}
+					</span>
+					<Button
+						variant="outline"
+						size="icon"
+						class={cn(
+							"h-8 w-8",
+							"motion-safe:hover:scale-110 motion-safe:active:scale-95",
+							"transition-transform duration-200"
+						)}
+						onClick={handleIncrement}
+					>
+						<span class="sr-only">Increase quantity</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M12 5v14M5 12h14" />
+						</svg>
+					</Button>
+				</div>
 			</div>
+			<Button
+				variant="ghost"
+				size="icon"
+				class={cn(
+					"h-8 w-8",
+					"motion-safe:hover:bg-destructive/10 motion-safe:hover:text-destructive",
+					"motion-safe:hover:rotate-90 transition-all duration-200"
+				)}
+				onClick={handleRemove}
+			>
+				<span class="sr-only">Remove item</span>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+				>
+					<path d="M18 6L6 18M6 6l12 12" />
+				</svg>
+			</Button>
 		</div>
 	);
 };

@@ -1,5 +1,5 @@
-import { Component, splitProps } from "solid-js";
-import { clsx } from "../../lib/utils";
+import { Component, JSX } from "solid-js";
+import { cn } from "../../lib/utils";
 
 interface SkeletonProps {
 	class?: string;
@@ -12,21 +12,15 @@ interface SkeletonProps {
 	variant?: "circle" | "rect" | "text";
 }
 
-export const Skeleton: Component<SkeletonProps> = (props) => {
-	const [local, rest] = splitProps(props, ["class", "variant"]);
-
+export const Skeleton: Component<JSX.HTMLAttributes<HTMLDivElement>> = (
+	props
+) => {
 	return (
 		<div
-			{...rest}
-			class={clsx(
-				"animate-pulse bg-muted",
-				{
-					"rounded-full": local.variant === "circle",
-					"rounded-md": local.variant === "rect" || !local.variant,
-					"w-[200px] rounded-md": local.variant === "text",
-				},
-				local.class
-			)}
-		/>
+			class={cn("animate-pulse rounded-md bg-muted", props.class)}
+			{...props}
+		>
+			{props.children}
+		</div>
 	);
 };

@@ -3,6 +3,7 @@ import { Button } from "../../ui/Button";
 import { useProducts } from "../../../stores/products.store";
 import { cartStore } from "../../../stores/cart.store";
 import { Card } from "../../common/Card";
+import { formatPrice } from "../../../lib/utils";
 
 export const CartSummary: Component = () => {
 	const { products } = useProducts();
@@ -24,18 +25,18 @@ export const CartSummary: Component = () => {
 			<div class="space-y-4">
 				<div class="flex justify-between text-sm">
 					<span>Subtotal</span>
-					<span>${subtotal().toFixed(2)}</span>
+					<span>{formatPrice(subtotal())}</span>
 				</div>
 
 				<div class="flex justify-between text-sm">
 					<span>Shipping</span>
-					<span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+					<span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
 				</div>
 
 				<div class="border-t border-border pt-4">
 					<div class="flex justify-between font-medium">
 						<span>Total</span>
-						<span>${total().toFixed(2)}</span>
+						<span>{formatPrice(total())}</span>
 					</div>
 				</div>
 

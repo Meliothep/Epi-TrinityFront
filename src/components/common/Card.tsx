@@ -1,30 +1,20 @@
 import { Component, JSX } from "solid-js";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 
-interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
-	padding?: "none" | "sm" | "md" | "lg";
-	shadow?: boolean;
+interface CardProps {
+	children: JSX.Element;
+	class?: string;
+	onClick?: JSX.EventHandlerUnion<HTMLDivElement, MouseEvent>;
 }
 
 export const Card: Component<CardProps> = (props) => {
-	const baseStyles = "rounded-lg border bg-card text-card-foreground";
-
-	const paddings = {
-		none: "",
-		sm: "p-4",
-		md: "p-6",
-		lg: "p-8",
-	};
-
 	return (
 		<div
-			{...props}
-			class={clsx(
-				baseStyles,
-				paddings[props.padding || "md"],
-				props.shadow && "shadow-lg",
+			class={cn(
+				"rounded-lg border bg-card text-card-foreground shadow-sm",
 				props.class
 			)}
+			onClick={props.onClick}
 		>
 			{props.children}
 		</div>

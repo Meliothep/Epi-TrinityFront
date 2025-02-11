@@ -8,7 +8,8 @@ import {
 	splitProps,
 } from "solid-js";
 import { Portal } from "solid-js/web";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
+import { IoClose } from "solid-icons/io";
 
 interface ModalProps extends JSX.HTMLAttributes<HTMLDivElement> {
 	isOpen: boolean;
@@ -44,7 +45,7 @@ export const Modal: Component<ModalProps> = (props) => {
 		setTimeout(() => {
 			setIsClosing(false);
 			local.onClose();
-		}, 150);
+		}, 300); // Increased duration to match our animations
 	};
 
 	const handleEscape = (e: KeyboardEvent) => {
@@ -64,75 +65,91 @@ export const Modal: Component<ModalProps> = (props) => {
 	return (
 		<Show when={local.isOpen}>
 			<Portal>
+				{/* Backdrop */}
 				<div
-					class={clsx(
-						"fixed inset-0 z-50 flex items-center justify-center p-4",
-						isClosing() ? "animate-fade-out" : "animate-fade-in"
+					class={cn(
+						"fixed inset-0 z-50 bg-background/80 backdrop-blur-sm",
+						isClosing()
+							? "motion-opacity-out-0 motion-duration-200"
+							: "motion-opacity-in-0 motion-duration-300"
 					)}
+					onClick={handleClose}
+					aria-hidden="true"
+				/>
+				{/* Modal */}
+				<div
+					class={cn(
+						"fixed inset-0 z-50 flex items-center justify-center",
+						isClosing()
+							? "motion-opacity-out-0 motion-duration-200"
+							: "motion-opacity-in-0 motion-duration-300"
+					)}
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby={local.title ? "modal-title" : undefined}
+					aria-describedby={local.description ? "modal-description" : undefined}
 				>
-					{/* Backdrop */}
 					<div
-						class={clsx(
-							"fixed inset-0 bg-background/80 backdrop-blur-sm",
-							isClosing() ? "animate-fade-out" : "animate-fade-in"
-						)}
-						onClick={handleClose}
-						aria-hidden="true"
-					/>
-
-					{/* Modal */}
-					<div
-						role="dialog"
-						aria-modal="true"
-						aria-labelledby={local.title ? "modal-title" : undefined}
-						aria-describedby={
-							local.description ? "modal-description" : undefined
-						}
-						{...rest}
-						class={clsx(
-							"relative w-full rounded-lg bg-background p-6 shadow-lg",
-							"animate-in data-[state=open]:fade-in-90 data-[state=open]:slide-in-from-bottom-10",
+						class={cn(
+							"relative w-full rounded-lg border bg-background p-6 shadow-lg",
+							isClosing()
+								? "motion-scale-out-95 motion-duration-200"
+								: "motion-scale-in-95 motion-duration-300 motion-ease-spring-smooth",
 							sizes[local.size || "md"],
 							local.class
 						)}
+						{...rest}
 					>
 						{/* Close button */}
 						<button
 							type="button"
 							onClick={handleClose}
-							class={clsx(
+							class={cn(
 								"absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background",
-								"transition-opacity hover:opacity-100",
+								"motion-preset-pulse-sm motion-ease-spring-smooth",
+								"hover:opacity-100",
 								"focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 							)}
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								class="h-4 w-4"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-							>
-								<path d="M18 6L6 18" />
-								<path d="M6 6L18 18" />
-							</svg>
+							<IoClose class="h-4 w-4" />
 							<span class="sr-only">Close</span>
 						</button>
-
 						{/* Content */}
-						<div class="space-y-4">
+						<div
+							class={cn(
+								"space-y-4",
+								"motion-opacity-in-0 motion-duration-500 motion-delay-100"
+							)}
+						>
 							<Show when={local.title}>
-								<h2 id="modal-title" class="text-lg font-semibold leading-none">
+								<h2
+									id="modal-title"
+									class={cn(
+										"text-lg font-semibold leading-none",
+										"motion-translate-y-in-25 motion-duration-300 motion-delay-200"
+									)}
+								>
 									{local.title}
 								</h2>
 							</Show>
 							<Show when={local.description}>
-								<p id="modal-description" class="text-sm text-muted-foreground">
+								<p
+									id="modal-description"
+									class={cn(
+										"text-sm text-muted-foreground",
+										"motion-translate-y-in-25 motion-duration-300 motion-delay-300"
+									)}
+								>
 									{local.description}
 								</p>
 							</Show>
-							{local.children}
+							<div
+								class={cn(
+									"motion-translate-y-in-25 motion-duration-300 motion-delay-400"
+								)}
+							>
+								{local.children}
+							</div>
 						</div>
 					</div>
 				</div>

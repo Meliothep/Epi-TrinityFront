@@ -1,6 +1,7 @@
 import { Component, JSX, Show, splitProps } from "solid-js";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 import { Spinner } from "../ui/Spinner";
+import { IoSearch } from "solid-icons/io";
 
 interface SearchInputProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
 	label?: string;
@@ -30,21 +31,10 @@ export const SearchInput: Component<SearchInputProps> = (props) => {
 			</Show>
 
 			<div class="relative">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
+				<IoSearch
 					class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
 					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				/>
 
 				<input
 					{...rest}
@@ -57,13 +47,13 @@ export const SearchInput: Component<SearchInputProps> = (props) => {
 							? `${rest.id}-description`
 							: undefined
 					}
-					class={clsx(
+					class={cn(
 						"flex h-10 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm ring-offset-background",
 						"placeholder:text-muted-foreground",
 						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
 						"disabled:cursor-not-allowed disabled:opacity-50",
 						local.isLoading && "pr-10",
-						local.error && "border-destructive",
+						local.error && "border-destructive focus-visible:ring-destructive",
 						local.class
 					)}
 				/>
@@ -78,7 +68,7 @@ export const SearchInput: Component<SearchInputProps> = (props) => {
 			<Show when={local.error || local.helperText}>
 				<p
 					id={local.error ? `${rest.id}-error` : `${rest.id}-description`}
-					class={clsx(
+					class={cn(
 						"text-sm",
 						local.error ? "text-destructive" : "text-muted-foreground"
 					)}

@@ -1,6 +1,7 @@
 import { Component } from "solid-js";
 import { Button } from "./Button";
 import { useTheme } from "../../stores/theme";
+import { cn } from "../../lib/utils";
 
 export const ThemeToggle: Component = () => {
 	const { isDark, toggleTheme } = useTheme();
@@ -13,7 +14,7 @@ export const ThemeToggle: Component = () => {
 			class="w-9 px-0"
 			aria-label="Toggle theme"
 		>
-			<div class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all">
+			<div class="relative h-[1.2rem] w-[1.2rem]">
 				{/* Sun icon for light mode */}
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -21,9 +22,13 @@ export const ThemeToggle: Component = () => {
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
 					stroke="currentColor"
-					class={`h-[1.2rem] w-[1.2rem] transition-all ${
-						isDark() ? "hidden" : "block"
-					}`}
+					class={cn(
+						"h-[1.2rem] w-[1.2rem] absolute inset-0",
+						"motion-safe:motion-duration-300 motion-safe:motion-ease-spring-2",
+						isDark()
+							? "motion-rotate-out-90 motion-opacity-out-0"
+							: "motion-rotate-in-0 motion-opacity-in-0"
+					)}
 				>
 					<path
 						stroke-linecap="round"
@@ -39,9 +44,13 @@ export const ThemeToggle: Component = () => {
 					viewBox="0 0 24 24"
 					stroke-width="1.5"
 					stroke="currentColor"
-					class={`h-[1.2rem] w-[1.2rem] transition-all ${
-						isDark() ? "block" : "hidden"
-					}`}
+					class={cn(
+						"h-[1.2rem] w-[1.2rem] absolute inset-0",
+						"motion-safe:motion-duration-300 motion-safe:motion-ease-spring-2",
+						isDark()
+							? "motion-rotate-in-0 motion-opacity-in-0"
+							: "motion-rotate-out-90 motion-opacity-out-0"
+					)}
 				>
 					<path
 						stroke-linecap="round"

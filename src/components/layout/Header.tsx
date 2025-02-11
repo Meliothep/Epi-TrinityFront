@@ -1,125 +1,212 @@
-import { Component, Show, For } from "solid-js";
-import { A } from "@solidjs/router";
-import { clsx } from "../../lib/utils";
+import { Component, Show, For, createMemo } from "solid-js";
+import { A, useNavigate } from "@solidjs/router";
+import { cn } from "../../lib/utils";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { useUI } from "../../stores/ui.store";
 import { Cart } from "../features/cart/Cart";
+import { authStore } from "../../stores/auth.store";
+import { Button } from "../ui/Button";
+import { FiUser, FiMenu, FiX } from "solid-icons/fi";
+import { adminStore } from "../../stores/admin.store";
+import { publicRoutes } from "../../routes/public/routes";
+import { protectedRoutes } from "../../routes/protected/routes";
+import { adminRoutes } from "../../routes/admin/routes";
+import { AppRoute } from "../../routes/types";
 
 interface HeaderProps {
 	class?: string;
 	sticky?: boolean;
 }
 
-interface NavLink {
-	href: string;
-	label: string;
-	end?: boolean;
-}
-
-const navLinks: NavLink[] = [
-	{ href: "/", label: "Home", end: true },
-	{ href: "/products", label: "Products" },
-	{ href: "/dashboard", label: "Dashboard" },
-	{ href: "/profile", label: "Profile" },
-	{ href: "/showcase", label: "Showcase" },
-];
-
 export const Header: Component<HeaderProps> = (props) => {
+	const navigate = useNavigate();
 	const { isMobileMenuOpen, toggleMobileMenu } = useUI();
+
+	// Combine and filter navigation links based on auth status and role
+	const navigationLinks = createMemo(() => {
+		const allRoutes = [...publicRoutes, ...protectedRoutes, ...adminRoutes];
+		return allRoutes.filter((route) => {
+			// Only show routes that are marked for navigation
+			if (!route.showInNav) return false;
+			// Filter based on authentication
+			if (route.requiresAuth && !authStore.isAuthenticated) return false;
+			if (route.requiresAdmin && !adminStore.isAdmin()) return false;
+			return true;
+		});
+	});
+
+	const handleLogout = async () => {
+		try {
+			// Close mobile menu if open
+			if (isMobileMenuOpen()) {
+				toggleMobileMenu();
+			}
+
+			// Attempt to sign out
+			await authStore.logout();
+			// The page will automatically refresh and redirect to home
+		} catch (error) {
+			console.error("Logout error:", error);
+		}
+	};
 
 	return (
 		<header
-			class={clsx(
+			class={cn(
 				"w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-				"border-b border-border",
+				"border-b border-border/40",
 				props.sticky && "sticky top-0 z-50",
+				"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth",
 				props.class
 			)}
 		>
 			<div class="container mx-auto px-4">
-				<div class="relative flex h-16 items-center justify-between">
+				<div class="relative flex h-16 items-center justify-between gap-4">
 					{/* Logo */}
 					<div class="flex items-center">
-						<a
+						<A
 							href="/"
 							class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent"
 							aria-label="Trinity - Home"
 						>
 							Trinity
-						</a>
+						</A>
 					</div>
 
 					{/* Desktop Navigation */}
 					<nav
-						class="hidden md:flex items-center space-x-6"
+						class={cn(
+							"hidden md:flex items-center space-x-1",
+							"bg-background/50 backdrop-blur-sm",
+							"px-2 rounded-full border border-border/40",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+						)}
 						aria-label="Main navigation"
 					>
-						<For each={navLinks}>
-							{(link: NavLink) => (
-								<A
-									href={link.href}
-									class="text-sm font-medium transition-colors hover:text-primary"
-									activeClass="text-primary"
-									end={link.end}
-									aria-current={link.end ? "page" : undefined}
-								>
-									{link.label}
-								</A>
+						<For each={navigationLinks()}>
+							{(route: AppRoute, index) => (
+								<Show when={route.title}>
+									<A
+										href={route.path}
+										class={cn(
+											"relative px-4 py-2 text-sm font-medium",
+											"hover:text-primary rounded-full transition-colors duration-200",
+											"data-[active]:text-primary data-[active]:bg-muted",
+											"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300",
+											"motion-safe:motion-delay-[var(--delay)]"
+										)}
+										style={{ "--delay": `${index() * 50}ms` }}
+										end={route.path === "/"}
+									>
+										{route.title}
+									</A>
+								</Show>
 							)}
 						</For>
-						<div class="flex items-center space-x-4">
-							<Cart />
-							<ThemeToggle />
-						</div>
 					</nav>
 
-					{/* Mobile Menu Button */}
-					<div class="flex items-center space-x-4 md:hidden">
+					{/* Desktop Actions */}
+					<div
+						class={cn(
+							"hidden md:flex items-center gap-2",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+						)}
+					>
 						<Cart />
-						<button
-							type="button"
-							class="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent"
+						<ThemeToggle />
+						<Show
+							when={authStore.isAuthenticated}
+							fallback={
+								<Button
+									variant="outline"
+									onClick={() => navigate("/login")}
+									class="shadow-sm"
+								>
+									Sign in
+								</Button>
+							}
+						>
+							<div class="flex items-center gap-2">
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => navigate("/profile")}
+									title="Profile"
+									class="rounded-full"
+								>
+									<Show
+										when={authStore.currentUser?.avatar}
+										fallback={<FiUser class="h-5 w-5" />}
+									>
+										<img
+											src={authStore.currentUser?.avatar}
+											alt={authStore.currentUser?.name}
+											class={cn(
+												"h-8 w-8 rounded-full ring-2 ring-background",
+												"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+											)}
+										/>
+									</Show>
+								</Button>
+								<Button
+									variant="outline"
+									onClick={handleLogout}
+									class="shadow-sm"
+								>
+									Sign out
+								</Button>
+							</div>
+						</Show>
+					</div>
+
+					{/* Mobile Navigation Controls */}
+					<div
+						class={cn(
+							"flex md:hidden items-center gap-2",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+						)}
+					>
+						<Show when={authStore.isAuthenticated}>
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => navigate("/profile")}
+								title="Profile"
+								class="rounded-full"
+							>
+								<Show
+									when={authStore.currentUser?.avatar}
+									fallback={<FiUser class="h-5 w-5" />}
+								>
+									<img
+										src={authStore.currentUser?.avatar}
+										alt={authStore.currentUser?.name}
+										class={cn(
+											"h-8 w-8 rounded-full ring-2 ring-background",
+											"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+										)}
+									/>
+								</Show>
+							</Button>
+						</Show>
+						<Cart />
+						<ThemeToggle />
+						<Button
+							variant="ghost"
+							size="icon"
 							onClick={toggleMobileMenu}
 							aria-controls="mobile-menu"
-							aria-expanded={isMobileMenuOpen() ? "true" : "false"}
-							aria-label="Toggle mobile menu"
+							aria-expanded={isMobileMenuOpen()}
+							class="rounded-full transition-transform duration-200"
 						>
 							<span class="sr-only">Open main menu</span>
 							<Show
 								when={!isMobileMenuOpen()}
-								fallback={
-									<svg
-										class="h-6 w-6"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke-width="1.5"
-										stroke="currentColor"
-										aria-hidden="true"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											d="M6 18L18 6M6 6l12 12"
-										/>
-									</svg>
-								}
+								fallback={<FiX class="h-5 w-5" />}
 							>
-								<svg
-									class="h-6 w-6"
-									fill="none"
-									viewBox="0 0 24 24"
-									stroke-width="1.5"
-									stroke="currentColor"
-									aria-hidden="true"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-									/>
-								</svg>
+								<FiMenu class="h-5 w-5" />
 							</Show>
-						</button>
+						</Button>
 					</div>
 				</div>
 
@@ -127,29 +214,71 @@ export const Header: Component<HeaderProps> = (props) => {
 				<Show when={isMobileMenuOpen()}>
 					<div
 						id="mobile-menu"
-						class="md:hidden border-t border-border animate-in slide-in-from-top"
+						class={cn(
+							"md:hidden border-t border-border/40",
+							"bg-background/95 backdrop-blur",
+							isMobileMenuOpen()
+								? "motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+								: "motion-safe:motion-translate-y-out-100 motion-safe:motion-duration-200"
+						)}
 					>
 						<nav
-							class="flex flex-col space-y-4 py-6"
+							class="flex flex-col space-y-1 py-4"
 							aria-label="Mobile navigation"
 						>
-							<For each={navLinks}>
-								{(link: NavLink) => (
-									<A
-										href={link.href}
-										class="text-sm font-medium transition-colors hover:text-primary px-4"
-										activeClass="text-primary"
-										end={link.end}
-										aria-current={link.end ? "page" : undefined}
-										onClick={toggleMobileMenu}
-									>
-										{link.label}
-									</A>
+							<For each={navigationLinks()}>
+								{(route: AppRoute, index) => (
+									<Show when={route.title}>
+										<A
+											href={route.path}
+											class={cn(
+												"px-4 py-2 text-sm font-medium",
+												"hover:text-primary hover:bg-muted rounded-lg transition-colors duration-200",
+												"data-[active]:text-primary data-[active]:bg-muted",
+												"motion-safe:motion-translate-x-in-25 motion-safe:motion-duration-300",
+												"motion-safe:motion-delay-[var(--delay)]"
+											)}
+											style={{ "--delay": `${index() * 50}ms` }}
+											end={route.path === "/"}
+											onClick={toggleMobileMenu}
+										>
+											{route.title}
+										</A>
+									</Show>
 								)}
 							</For>
-							<div class="px-4">
-								<ThemeToggle />
-							</div>
+							<Show
+								when={!authStore.isAuthenticated}
+								fallback={
+									<Button
+										variant="outline"
+										class={cn(
+											"mx-4 mt-3 shadow-sm",
+											"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
+										)}
+										onClick={() => {
+											handleLogout();
+											toggleMobileMenu();
+										}}
+									>
+										Sign out
+									</Button>
+								}
+							>
+								<Button
+									variant="outline"
+									class={cn(
+										"mx-4 mt-3 shadow-sm",
+										"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
+									)}
+									onClick={() => {
+										navigate("/login");
+										toggleMobileMenu();
+									}}
+								>
+									Sign in
+								</Button>
+							</Show>
 						</nav>
 					</div>
 				</Show>

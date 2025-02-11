@@ -1,5 +1,5 @@
 import { Component, For, JSX, Show, createSignal, splitProps } from "solid-js";
-import { clsx } from "../../lib/utils";
+import { cn } from "../../lib/utils";
 
 interface Tab {
 	id: string;
@@ -81,11 +81,11 @@ export const Tabs: Component<TabsProps> = (props) => {
 	};
 
 	return (
-		<div {...rest} class={clsx("w-full", local.class)}>
+		<div {...rest} class={cn("w-full", local.class)}>
 			{/* Tab List */}
 			<div
 				role="tablist"
-				class={clsx(
+				class={cn(
 					variants[local.variant || "default"],
 					sizes[local.size || "md"]
 				)}
@@ -101,7 +101,7 @@ export const Tabs: Component<TabsProps> = (props) => {
 							disabled={tab.disabled}
 							onClick={() => setActiveTab(tab.id)}
 							onKeyDown={(e) => handleKeyDown(e, tab.id)}
-							class={clsx(
+							class={cn(
 								tabStyles[local.variant || "default"].base,
 								activeTab() === tab.id
 									? tabStyles[local.variant || "default"].active
@@ -122,8 +122,8 @@ export const Tabs: Component<TabsProps> = (props) => {
 							role="tabpanel"
 							id={`panel-${tab.id}`}
 							aria-labelledby={`tab-${tab.id}`}
-							hidden={activeTab() !== tab.id}
-							class={clsx(activeTab() === tab.id && "animate-fade-in")}
+							aria-hidden={activeTab() !== tab.id ? "true" : "false"}
+							class={cn(activeTab() === tab.id && "animate-fade-in")}
 						>
 							{tab.content}
 						</div>

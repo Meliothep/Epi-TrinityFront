@@ -1,17 +1,24 @@
-import { Component, lazy } from "solid-js";
-import { Router, Route, RouteSectionProps } from "@solidjs/router";
+import { Component, ParentComponent, createEffect } from "solid-js";
+import { Router } from "@solidjs/router";
 import { Header } from "./components/layout/Header";
-
-// Lazy load page components
-const Home = lazy(() => import("./pages/Home"));
-const Products = lazy(() => import("./pages/Products"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Profile = lazy(() => import("./pages/Profile"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Showcase = lazy(() => import("./pages/Showcase"));
+import { AdminLayout } from "./components/layout/AdminLayout";
+import { AppRoutes } from "./routes";
+import { useUI, usePersistentUI } from "./stores/ui.store";
 
 // Root layout component
-const RootLayout: Component<RouteSectionProps> = (props) => {
+const RootLayout: ParentComponent = (props) => {
+	const { theme } = useUI();
+
+	// Initialize UI persistence
+	usePersistentUI();
+
+	// Handle theme changes
+	createEffect(() => {
+		const currentTheme = theme();
+		document.documentElement.classList.remove("light", "dark");
+		document.documentElement.classList.add(currentTheme);
+	});
+
 	return (
 		<div class="min-h-screen bg-background text-foreground">
 			<Header sticky />
@@ -23,12 +30,7 @@ const RootLayout: Component<RouteSectionProps> = (props) => {
 export const App: Component = () => {
 	return (
 		<Router root={RootLayout}>
-			<Route path="/" component={Home} />
-			<Route path="/products" component={Products} />
-			<Route path="/dashboard" component={Dashboard} />
-			<Route path="/profile" component={Profile} />
-			<Route path="/showcase" component={Showcase} />
-			<Route path="*" component={NotFound} />
+			<AppRoutes />
 		</Router>
 	);
 };

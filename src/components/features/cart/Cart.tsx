@@ -1,113 +1,188 @@
-import { Component, Show, createSignal, createEffect } from "solid-js";
+import {
+	Component,
+	Show,
+	createSignal,
+	createEffect,
+	createMemo,
+	For,
+} from "solid-js";
+import { Portal } from "solid-js/web";
+import { useNavigate } from "@solidjs/router";
 import { Button } from "../../ui/Button";
 import { CartItem } from "./CartItem";
-import { cartStore } from "../../../stores/cart.store";
 import { useProducts } from "../../../stores/products.store";
-import { IoCartOutline, IoClose } from "solid-icons/io";
-import { clsx } from "../../../lib/utils";
+import { FiShoppingCart, FiX } from "solid-icons/fi";
+import { cn } from "../../../lib/utils";
+import { CartSummary } from "./CartSummary";
+import useCheckout from "../../../hooks/useCheckout";
+import { useCart } from "../../../stores/cart.store";
+import { formatCurrency } from "../../../lib/format";
 
 export const Cart: Component = () => {
+	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = createSignal(false);
 	const [isAnimating, setIsAnimating] = createSignal(false);
 	const { products } = useProducts();
+	const checkout = useCheckout;
+	const cart = useCart();
+
+	// Calculate total price using createMemo for better performance
+	const totalPrice = createMemo(() => {
+		const items = cart.items();
+		const currentProducts = products();
+		if (!items || !currentProducts) return 0;
+
+		return items.reduce((total, item) => {
+			const product = currentProducts.find((p) => p.id === item.id);
+			return total + (product?.price || 0) * item.quantity;
+		}, 0);
+	});
 
 	// Watch for cart changes and trigger animation
 	createEffect(() => {
-		const count = cartStore.getItemCount();
+		const count = cart.itemCount();
 		if (count > 0) {
 			setIsAnimating(true);
 			setTimeout(() => setIsAnimating(false), 1000);
 		}
 	});
 
+	const handleClose = () => {
+		setIsOpen(false);
+	};
+
+	const handleCheckout = () => {
+		handleClose();
+		checkout.openCheckout();
+	};
+
+	const cartItems = createMemo(() => cart.items());
+	const itemCount = createMemo(() => cart.itemCount());
+
 	return (
 		<div class="relative">
-			<button
+			<Button
+				variant="ghost"
+				size="icon"
 				onClick={() => setIsOpen(!isOpen())}
-				class="relative p-2 rounded-md hover:bg-accent"
-				aria-label="Cart"
+				class={cn(
+					"rounded-full relative",
+					"motion-safe:hover:scale-105 motion-safe:active:scale-95",
+					"transition-transform duration-200"
+				)}
+				title="Shopping Cart"
 			>
-				<IoCartOutline
-					class={clsx(
-						"w-5 h-5",
-						isAnimating() && "animate-bounce text-primary"
-					)}
+				<FiShoppingCart
+					class={cn("h-5 w-5", isAnimating() && "motion-safe:animate-bounce")}
 				/>
-				<Show when={cartStore.getItemCount() > 0}>
-					<span class="absolute -top-1 -right-1 w-4 h-4 text-xs bg-primary text-primary-foreground rounded-full flex items-center justify-center">
-						{cartStore.getItemCount()}
+				<Show when={itemCount() > 0}>
+					<span
+						class={cn(
+							"absolute -top-1 -right-1 w-4 h-4 text-xs bg-primary text-primary-foreground rounded-full flex items-center justify-center",
+							"motion-safe:animate-fade-in motion-safe:animate-duration-300"
+						)}
+					>
+						{itemCount()}
 					</span>
 				</Show>
-			</button>
+			</Button>
 
 			<Show when={isOpen()}>
-				<div class="absolute right-0 top-12 w-80 md:w-96 bg-background border rounded-lg shadow-lg z-50">
-					<div class="p-4 border-b flex items-center justify-between">
-						<h2 class="font-semibold">Shopping Cart</h2>
-						<button
-							onClick={() => setIsOpen(false)}
-							class="p-2 hover:bg-accent rounded-md"
-							aria-label="Close cart"
+				<Portal>
+					<div
+						class={cn(
+							"fixed inset-0 bg-background/80 backdrop-blur-sm z-50",
+							"motion-safe:animate-fade-in motion-safe:animate-duration-200",
+							!isOpen() &&
+								"motion-safe:animate-fade-out motion-safe:animate-duration-200"
+						)}
+						onClick={handleClose}
+					>
+						<div
+							class={cn(
+								"fixed right-0 top-0 h-full w-full max-w-md border-l bg-background p-6 shadow-lg",
+								"motion-safe:animate-slide-in-right motion-safe:animate-duration-300",
+								!isOpen() &&
+									"motion-safe:animate-slide-out-right motion-safe:animate-duration-200"
+							)}
+							onClick={(e) => e.stopPropagation()}
 						>
-							<IoClose class="w-5 h-5" />
-						</button>
-					</div>
+							<div class="flex h-full flex-col">
+								<div class="flex items-center justify-between">
+									<h2 class="text-2xl font-semibold motion-safe:animate-fade-down motion-safe:animate-duration-500">
+										Shopping Cart
+									</h2>
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={handleClose}
+										class="motion-safe:hover:rotate-90 transition-transform duration-200"
+									>
+										<span class="sr-only">Close</span>
+										<FiX class="h-6 w-6" />
+									</Button>
+								</div>
 
-					<div class="p-4 max-h-96 overflow-auto">
-						<Show
-							when={cartStore.items().length > 0}
-							fallback={
-								<p class="text-center text-muted-foreground py-8">
-									Your cart is empty
-								</p>
-							}
-						>
-							<div class="space-y-4">
-								{cartStore.items().map((item) => (
-									<CartItem itemId={item.id} quantity={item.quantity} />
-								))}
-							</div>
-						</Show>
-					</div>
+								<Show when={cartItems().length > 0}>
+									<div class="mt-8 flex-1 overflow-auto">
+										<For each={cartItems()}>
+											{(item, index) => (
+												<div
+													class={cn(
+														"motion-safe:animate-fade-in motion-safe:animate-duration-300",
+														"motion-safe:animate-delay-[var(--delay)]"
+													)}
+													style={{ "--delay": `${index() * 100}ms` }}
+												>
+													<CartItem itemId={item.id} quantity={item.quantity} />
+												</div>
+											)}
+										</For>
+									</div>
 
-					<Show when={cartStore.items().length > 0}>
-						<div class="p-4 border-t space-y-4">
-							<div class="flex items-center justify-between mb-4">
-								<span class="font-medium">Total</span>
-								<span class="font-medium">
-									$
-									{cartStore
-										.items()
-										.reduce((total, item) => {
-											const product = products().find((p) => p.id === item.id);
-											return total + (product?.price || 0) * item.quantity;
-										}, 0)
-										.toFixed(2)}
-								</span>
-							</div>
+									<div class="mt-8 border-t pt-8 motion-safe:animate-fade-up motion-safe:animate-duration-500">
+										<CartSummary />
+										<Button
+											class={cn(
+												"mt-8 w-full",
+												"motion-safe:hover:scale-[1.02] transition-transform duration-200"
+											)}
+											onClick={handleCheckout}
+											disabled={cartItems().length === 0}
+										>
+											Checkout ({formatCurrency(totalPrice())})
+										</Button>
+									</div>
+								</Show>
 
-							<div class="grid gap-2">
-								<Button
-									class="w-full"
-									onClick={() => {
-										// TODO: Implement checkout
-										console.log("Proceeding to checkout...");
-										setIsOpen(false);
-									}}
-								>
-									Checkout
-								</Button>
-								<Button
-									variant="outline"
-									class="w-full"
-									onClick={() => setIsOpen(false)}
-								>
-									Continue Shopping
-								</Button>
+								<Show when={cartItems().length === 0}>
+									<div class="flex h-full flex-col items-center justify-center motion-safe:animate-fade-in motion-safe:animate-duration-500">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-16 w-16 text-muted-foreground motion-safe:animate-fade-down motion-safe:animate-duration-700"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+											/>
+										</svg>
+										<p class="mt-4 text-lg font-medium motion-safe:animate-fade-up motion-safe:animate-delay-300">
+											Your cart is empty
+										</p>
+										<p class="mt-2 text-sm text-muted-foreground motion-safe:animate-fade-up motion-safe:animate-delay-500">
+											Add items to your cart to see them here
+										</p>
+									</div>
+								</Show>
 							</div>
 						</div>
-					</Show>
-				</div>
+					</div>
+				</Portal>
 			</Show>
 		</div>
 	);
