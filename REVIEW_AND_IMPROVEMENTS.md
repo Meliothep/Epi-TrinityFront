@@ -306,8 +306,8 @@ const MyComponent = () => {
   - [x] Add proper persistence to cart store
   - [x] Update Cart and CartItem components to use new store pattern
   - [ ] Refactor remaining stores (auth, products, favorites, etc.)
-  - [ ] Add tests for store implementations
-- [ ] Testing setup (Pending)
+  - [ ] Add tests for store implementations (to be skipped for now)
+- [ ] Testing setup (to be skipped for now)
   - [ ] Setup Vitest configuration
   - [ ] Add testing utilities and helpers
   - [ ] Implement component testing patterns
