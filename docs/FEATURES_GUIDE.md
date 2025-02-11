@@ -1,623 +1,206 @@
-# Trinity Frontend Features Guide
-
-This guide provides detailed information about the features implemented in the Trinity Frontend project and how to use them effectively.
-
-## Table of Contents
-
-1. [Component Architecture](#component-architecture)
-2. [State Management](#state-management)
-3. [Error Handling](#error-handling)
-4. [Loading States](#loading-states)
-5. [Routing System](#routing-system)
-6. [Theme System](#theme-system)
-7. [Animation System](#animation-system)
-
-## Component Architecture
-
-### Base Component Structure
-
-All components in Trinity follow a consistent structure:
-
-```tsx
-import { Component } from "solid-js";
-
-interface ComponentProps extends BaseProps {
-  // Component-specific props
-}
-
-export const MyComponent: Component<ComponentProps> = (props) => {
-  // 1. Signals (State)
-  const [state, setState] = createSignal(initialState);
-
-  // 2. Computed Values
-  const computed = createMemo(() => {
-    // Derived state calculations
-    return state();
-  });
-
-  // 3. Effects
-  createEffect(() => {
-    // Side effects
-  });
-
-  // 4. Event Handlers
-  const handleAction = () => {
-    // Handle events
-  };
-
-  // 5. Render
-  return (
-    <div class={cn("base-classes", props.class)} style={props.style}>
-      {/* Component JSX */}
-    </div>
-  );
-};
-```
-
-### Component Documentation
-
-Each component should have a documentation file following this structure:
-
-```markdown
-# Component Name
-
-Brief description
-
-## Usage
-
-\```tsx
-import { ComponentName } from '@/components/ComponentName';
-
-<ComponentName prop1="value" />
-\```
-
-## Props
-
-| Name  | Type       | Default | Description |
-| ----- | ---------- | ------- | ----------- |
-| prop1 | \`string\` | -       | Description |
-
-## Examples
-
-### Basic Usage
-### Advanced Usage
-
-## Best Practices
-```
-
-## State Management
-
-### Creating a Store
-
-Trinity uses a custom store implementation with middleware support:
-
-```typescript
-import { createStore } from '@/stores/core/createStore';
-import { loggerMiddleware, mergeMiddleware } from '@/stores/core/middleware';
-
-interface MyState {
-  value: string;
-  count: number;
-}
-
-const initialState: MyState = {
-  value: '',
-  count: 0
-};
-
-const myStore = createStore({
-  initialState,
-  storageKey: 'my-store', // Optional: for persistence
-  middleware: [
-    loggerMiddleware,
-    mergeMiddleware()
-  ]
-});
-
-// Create actions
-export const increment = () => {
-  myStore.setState(prev => ({
-    ...prev,
-    count: prev.count + 1
-  }));
-};
-
-// Create hook for components
-export const useMyStore = () => {
-  const state = myStore.state();
-  
-  return {
-    ...state,
-    increment
-  };
-};
-```
-
-### Available Middleware
-
-1. **Logger Middleware**
-   ```typescript
-   loggerMiddleware // Logs all state changes
-   ```
-
-2. **Validator Middleware**
-   ```typescript
-   validatorMiddleware<T>(schema: (state: T) => boolean)
-   ```
-
-3. **Immutable Fields Middleware**
-   ```typescript
-   immutableFieldsMiddleware<T>(fields: (keyof T)[])
-   ```
-
-4. **Debounce Middleware**
-   ```typescript
-   debounceMiddleware<T>(delay: number)
-   ```
-
-5. **Merge Middleware**
-   ```typescript
-   mergeMiddleware<T>()
-   ```
-
-### Using Stores in Components
-
-```tsx
-const MyComponent = () => {
-  const { count, increment } = useMyStore();
-  
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={increment}>Increment</button>
-    </div>
-  );
-};
-```
-
-## Error Handling
-
-### Error Boundary Component
-
-```tsx
-import { ErrorBoundary } from '@/components/base/ErrorBoundary';
-
-const MyComponent = () => {
-  return (
-    <ErrorBoundary
-      fallback={(error, reset) => (
-        <div>
-          <p>Error: {error.message}</p>
-          <button onClick={reset}>Try Again</button>
-        </div>
-      )}
-      onError={(error) => {
-        // Log error to service
-      }}
-    >
-      <ChildComponent />
-    </ErrorBoundary>
-  );
-};
-```
-
-### Best Practices for Error Handling
-
-1. Use Error Boundaries for component-level errors
-2. Implement proper error states in forms
-3. Show user-friendly error messages
-4. Provide recovery actions when possible
-
-## Loading States
-
-### Loading Component
-
-```tsx
-import { Loading } from '@/components/base/Loading';
-
-// Simple usage
-<Loading />
-
-// With customization
-<Loading 
-  size="lg"
-  text="Loading data..."
-  fullHeight
-/>
-
-// Conditional rendering
-<Show
-  when={!loading}
-  fallback={<Loading text="Loading..." />}
->
-  <Content />
-</Show>
-```
-
-### Loading States Best Practices
-
-1. Use appropriate loading indicators for the context
-2. Show loading states for operations over 300ms
-3. Implement skeleton loading for content-heavy pages
-4. Maintain layout stability during loading
-
-## Routing System
-
-### Route Configuration
-
-Routes are organized into three categories:
-- Public routes (`/routes/public`)
-- Protected routes (`/routes/protected`)
-- Admin routes (`/routes/admin`)
-
-```typescript
-// Example route configuration
-const routes: AppRoute[] = [
-  {
-    path: '/dashboard',
-    component: lazy(() => import('@/pages/Dashboard')),
-    title: 'Dashboard',
-    showInNav: true,
-    requiresAuth: true
-  }
-];
-```
-
-### Route Guards
-
-```tsx
-// Protect routes requiring authentication
-<AuthGuard>
-  <ProtectedComponent />
-</AuthGuard>
-
-// Protect admin routes
-<AdminGuard>
-  <AdminComponent />
-</AdminGuard>
-
-// Public only routes (like login)
-<PublicOnlyGuard>
-  <LoginComponent />
-</PublicOnlyGuard>
-```
-
-## Theme System
-
-### Theme Configuration
-
-Trinity uses a custom theme system built on Tailwind CSS:
-
-```typescript
-// Using theme classes
-<div class={cn(
-  "bg-background text-foreground",
-  "dark:bg-background-dark dark:text-foreground-dark"
-)}>
-  Content
-</div>
-```
-
-### Theme Toggle
-
-```tsx
-import { useUI } from '@/stores/ui.store';
-
-const ThemeToggle = () => {
-  const { theme, toggleTheme } = useUI();
-  
-  return (
-    <button onClick={toggleTheme}>
-      {theme === 'light' ? 'Dark' : 'Light'} Mode
-    </button>
-  );
-};
-```
-
-### Available Theme Tokens
-
-- Background: `bg-background`
-- Foreground: `text-foreground`
-- Primary: `bg-primary text-primary-foreground`
-- Secondary: `bg-secondary text-secondary-foreground`
-- Accent: `bg-accent text-accent-foreground`
-- Muted: `bg-muted text-muted-foreground`
-- Card: `bg-card text-card-foreground`
-
 ## 🎭 Animation System
 
-Trinity uses the `tailwindcss-motion` plugin to provide subtle, purposeful animations that enhance the user experience without being overwhelming. Our animation system follows these key principles:
+Trinity uses the `tailwindcss-motion` plugin to provide a robust and accessible animation system. This plugin automatically handles reduced motion preferences and provides a comprehensive set of utilities for creating smooth, performant animations.
 
-1. **Purposeful**: Each animation serves a specific function
-2. **Subtle**: Animations are gentle and non-distracting
-3. **Consistent**: Similar interactions use similar animations
-4. **Accessible**: All animations respect user motion preferences
-
-### Core Animation Patterns
+### Base Animations
 
 ```typescript
-// Entry Animations - Subtle and functional
-const entryAnimations = {
-  // Gentle fade in
-  fadeIn: "motion-safe:motion-opacity-in-0 motion-safe:motion-duration-300",
-  
-  // Subtle slide up
-  slideUp: "motion-safe:motion-translate-y-in-25 motion-safe:motion-duration-300",
-  
-  // Smooth scale in
-  scaleIn: "motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
-}
+// Opacity animations
+"motion-opacity-in-0"  // Fade in from transparent
+"motion-opacity-out-0" // Fade out to transparent
 
-// Interactive States - Minimal and responsive
-const interactiveStates = {
-  // Simple color transitions
-  hover: "transition-colors duration-200",
-  
-  // Subtle scale feedback
-  active: "active:motion-safe:motion-scale-95",
-  
-  // Gentle transform
-  focus: "focus:motion-safe:motion-translate-y-neg-1"
-}
+// Translation animations
+"motion-translate-y-in-100"  // Slide up from below
+"motion-translate-y-out-100" // Slide down and out
+"motion-translate-x-in-100"  // Slide in from right
+"motion-translate-x-out-100" // Slide out to right
 
-// Transition Animations - Smooth and natural
-const transitions = {
-  // Natural spring easing
-  spring: "motion-safe:motion-ease-spring-smooth",
-  
-  // Quick and subtle
-  quick: "motion-safe:motion-duration-200",
-  
-  // Smooth and deliberate
-  smooth: "motion-safe:motion-duration-300"
-}
+// Scale animations
+"motion-scale-in-75"  // Scale up from 75%
+"motion-scale-out-75" // Scale down to 75%
+
+// Rotation animations
+"motion-rotate-in-180"  // Rotate in 180 degrees
+"motion-rotate-out-180" // Rotate out 180 degrees
 ```
 
-### Best Practices
+### Animation Presets
 
-1. **Keep Animations Minimal**
 ```typescript
-// ✅ Good: Simple, purposeful animation
-const goodExample = {
-  button: "transition-colors duration-200 hover:bg-accent",
-  modal: "motion-safe:motion-scale-in-95 motion-safe:motion-duration-300",
-  menu: "motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-200"
-}
-
-// ❌ Bad: Excessive, distracting animations
-const badExample = {
-  button: "motion-preset-pulse hover:motion-scale-110 hover:motion-rotate-12",
-  modal: "motion-preset-bounce motion-duration-500 motion-delay-300",
-  menu: "motion-preset-shake motion-loop-infinite"
-}
+// Common animation patterns
+"motion-preset-pulse-sm"  // Subtle pulse animation
+"motion-preset-bounce"    // Bouncy animation
+"motion-preset-slide-up"  // Slide up and fade in
 ```
 
-2. **Use Consistent Timing**
+### Modifiers
+
+1. **Duration**
 ```typescript
-const timingGuidelines = {
-  // Quick transitions
-  hover: "duration-200",
-  
-  // Standard animations
-  entry: "motion-safe:motion-duration-300",
-  
-  // Complex transitions
-  exit: "motion-safe:motion-duration-200"
-}
+"motion-duration-200" // Fast
+"motion-duration-300" // Normal
+"motion-duration-500" // Slow
 ```
 
-3. **Respect Motion Preferences**
+2. **Delay**
 ```typescript
-// Always use motion-safe prefix
-const accessibleAnimations = {
-  entry: "motion-safe:motion-translate-y-in-0",
-  hover: "hover:motion-safe:motion-scale-102",
-  active: "active:motion-safe:motion-scale-95"
-}
+"motion-delay-100" // Short delay
+"motion-delay-300" // Medium delay
+"motion-delay-500" // Long delay
+```
+
+3. **Easing**
+```typescript
+// Spring physics
+"motion-ease-spring-smooth"  // Smooth spring
+"motion-ease-spring-bouncy"  // Bouncy spring
+"motion-ease-spring-snappy"  // Snappy spring
+
+// Standard easing
+"motion-ease-in-quart"
+```
+
+4. **Loop**
+```typescript
+"motion-translate-y-loop-25"     // Infinite loop
+"motion-translate-y-loop-25/reset" // Loop with reset
+"motion-loop-twice"              // Loop twice
+```
+
+### Property-Specific Modifiers
+
+```typescript
+// Apply different timing to different properties
+"motion-duration-300/translate motion-translate-y-in-100" // 300ms for translation
+"motion-duration-500/opacity motion-opacity-in-0"         // 500ms for opacity
+
+// Apply different delays to different properties
+"motion-delay-500/rotate motion-rotate-in-180" // 500ms delay for rotation
+"motion-opacity-in-0"                          // Immediate fade
 ```
 
 ### Common Use Cases
 
-1. **Navigation Elements**
+1. **Modal/Dialog**
 ```typescript
-const navExample = {
-  // Subtle entry animation
-  container: cn(
-    "bg-background/50 backdrop-blur-sm",
-    "motion-safe:motion-translate-y-in-0",
-    "motion-safe:motion-duration-300"
-  ),
-  
-  // Simple hover state
-  link: cn(
-    "transition-colors duration-200",
-    "hover:text-primary"
-  )
-}
+const Modal = () => (
+  <div class={cn(
+    // Backdrop
+    "fixed inset-0 bg-background/80 backdrop-blur-sm",
+    "motion-opacity-in-0 motion-duration-200"
+  )}>
+    <div class={cn(
+      // Content
+      "fixed inset-y-0 right-0 w-full max-w-sm bg-background p-6",
+      "motion-translate-x-in-100 motion-duration-300 motion-ease-spring-smooth"
+    )}>
+      {/* Modal content */}
+    </div>
+  </div>
+)
 ```
 
-2. **Modal/Dialog**
+2. **List Items with Staggered Animation**
 ```typescript
-const modalExample = {
-  // Subtle backdrop fade
-  backdrop: cn(
-    "bg-background/80 backdrop-blur-sm",
-    "motion-safe:motion-opacity-in-0",
-    "motion-safe:motion-duration-200"
-  ),
-  
-  // Gentle scale animation
-  content: cn(
-    "bg-background p-6",
-    "motion-safe:motion-scale-in-95",
-    "motion-safe:motion-duration-300",
-    "motion-safe:motion-ease-spring-smooth"
-  )
-}
+const List = () => (
+  <For each={items}>
+    {(item, index) => (
+      <div class={cn(
+        "motion-preset-slide-up",
+        { style: { "--motion-delay": `${index() * 100}ms` } }
+      )}>
+        {item}
+      </div>
+    )}
+  </For>
+)
 ```
 
 3. **Interactive Elements**
 ```typescript
-const buttonExample = {
-  // Simple, effective feedback
-  base: cn(
-    "rounded-md px-4 py-2",
-    "transition-colors duration-200",
-    "hover:bg-accent",
-    "active:motion-safe:motion-scale-95"
-  )
-}
+const Button = () => (
+  <button class={cn(
+    "rounded-lg px-4 py-2 bg-primary text-primary-foreground",
+    "motion-preset-pulse-sm motion-ease-spring-smooth"
+  )}>
+    Click me
+  </button>
+)
 ```
 
-### Animation Timing Guidelines
-
+4. **Loading States**
 ```typescript
-const timings = {
-  // Instant feedback
-  hover: "duration-200",
-  active: "duration-150",
-  
-  // Smooth transitions
-  entry: "motion-safe:motion-duration-300",
-  exit: "motion-safe:motion-duration-200",
-  
-  // Complex animations
-  stagger: "motion-safe:motion-delay-[var(--delay)]" // 50ms increments
-}
+const LoadingStates = () => (
+  <div>
+    {/* Skeleton */}
+    <div class="motion-preset-pulse-sm h-4 w-24 bg-muted rounded" />
+    
+    {/* Spinner */}
+    <div class="motion-rotate-loop-360 w-5 h-5 border-2 border-primary rounded-full" />
+    
+    {/* Shimmer */}
+    <div class="motion-translate-x-loop-100 relative overflow-hidden" />
+  </div>
+)
 ```
 
-### Performance Considerations
+### Best Practices
 
-1. **Optimize for Rendering**
+1. **Performance**
+- Use transform-based animations (`translate`, `scale`, `rotate`) instead of layout properties
+- Avoid animating layout properties like `width`, `height`, or `margin`
+- Use hardware-accelerated properties (`transform`, `opacity`) for smooth animations
+
+2. **Accessibility**
+- The plugin automatically handles reduced motion preferences
+- No need for manual `motion-safe:` prefixes
+- Provide meaningful alternatives for users with reduced motion
+
+3. **Timing Guidelines**
+- Entry animations: 300-500ms
+- Exit animations: 200-300ms
+- Hover states: 200ms
+- Loading states: Use presets
+
+4. **Animation Composition**
+- Combine multiple properties for complex animations
+- Use property-specific modifiers for fine-grained control
+- Layer animations with different delays for natural movement
+
+### Examples in Trinity
+
+1. **Shopping Cart**
 ```typescript
-// ✅ Good: Use transform and opacity
-const performant = {
-  scale: "motion-safe:motion-scale-95",
-  fade: "motion-safe:motion-opacity-in-0",
-  move: "motion-safe:motion-translate-y-in-25"
-}
+// Cart panel slide in
+"motion-translate-x-in-100 motion-duration-300 motion-ease-spring-smooth"
 
-// ❌ Bad: Animate expensive properties
-const expensive = {
-  height: "transition-[height]",
-  boxShadow: "transition-[box-shadow]",
-  filter: "transition-[filter]"
-}
+// Cart items stagger
+"motion-preset-slide-up"
+
+// Add to cart button feedback
+"motion-preset-pulse-sm motion-ease-spring-smooth"
 ```
 
-2. **Reduce Animation Load**
+2. **Product Gallery**
 ```typescript
-// ✅ Good: Minimal, purposeful animations
-const minimal = {
-  card: "transition-transform hover:motion-safe:motion-translate-y-neg-1",
-  button: "transition-colors hover:bg-accent"
-}
+// Image hover
+"motion-scale-in-95 motion-duration-200"
 
-// ❌ Bad: Multiple simultaneous animations
-const overwhelming = {
-  card: "motion-preset-pulse motion-preset-bounce motion-preset-spin",
-  button: "hover:motion-scale-110 hover:motion-rotate-12 hover:motion-translate-y-neg-2"
-}
+// Loading skeleton
+"motion-preset-pulse-sm"
+
+// Gallery navigation
+"motion-translate-x-in-100 motion-ease-spring-smooth"
 ```
 
-### Examples from Trinity
-
-1. **Header Navigation**
+3. **Form Feedback**
 ```typescript
-// Subtle entry animation
-"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300"
+// Success message
+"motion-preset-slide-up motion-duration-300"
 
-// Simple hover states
-"hover:text-primary transition-colors duration-200"
+// Error shake
+"motion-preset-bounce motion-ease-spring-snappy"
 
-// Mobile menu transition
-"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300"
-```
-
-2. **Interactive Components**
-```typescript
-// Button states
-"transition-colors duration-200 hover:bg-accent active:motion-safe:motion-scale-95"
-
-// Avatar loading
-"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
-
-// Theme toggle
-"transition-transform duration-200"
-```
-
-These guidelines ensure that animations enhance the user experience while maintaining a professional, polished feel throughout the application.
-
-## Best Practices
-
-### 1. Component Development
-
-- Follow the established component structure
-- Document components using the template
-- Implement proper prop types
-- Use composition over inheritance
-
-### 2. State Management
-
-- Keep stores focused and minimal
-- Use appropriate middleware
-- Implement proper cleanup in components
-- Use selectors for optimal performance
-
-### 3. Error Handling
-
-- Always provide fallback UI
-- Log errors appropriately
-- Give users clear error messages
-- Implement recovery mechanisms
-
-### 4. Performance
-
-- Use lazy loading for routes
-- Implement proper memoization
-- Optimize re-renders
-- Use appropriate loading states
-
-### 5. Accessibility
-
-- Implement proper ARIA attributes
-- Ensure keyboard navigation
-- Provide proper contrast
-- Test with screen readers
-
-## Contributing
-
-When contributing new features:
-
-1. Follow the established patterns
-2. Add proper documentation
-3. Include examples
-4. Add tests
-5. Update this guide
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Store updates not reflecting**
-   - Check if you're using the store hook correctly
-   - Verify the subscription cleanup
-
-2. **Route guards not working**
-   - Ensure proper authentication state
-   - Check route configuration
-
-3. **Theme not applying**
-   - Verify theme class application
-   - Check dark mode configuration
-
-### Getting Help
-
-- Check the documentation first
-- Search existing issues
-- Ask in the development channel
-- Create a detailed issue if needed
-
----
-
-This guide will be updated as new features are added or existing ones are modified. For the latest information, always refer to the source code and comments. 
+// Loading spinner
+"motion-rotate-loop-360"
+``` 
