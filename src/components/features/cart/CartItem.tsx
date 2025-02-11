@@ -1,13 +1,9 @@
-import { Component } from "solid-js";
+import { Component, Show, createMemo } from "solid-js";
 import { Button } from "../../ui/Button";
 import { useProducts } from "../../../stores/products.store";
-import { cartStore } from "../../../stores/cart.store";
-import {
-	formatPrice,
-	getProductImageUrl,
-	getFallbackImageUrl,
-} from "../../../lib/utils";
-import { FiTrash2 } from "solid-icons/fi";
+import { useCart } from "../../../stores/cart.store";
+import { formatCurrency } from "../../../lib/format";
+import { getFallbackImageUrl, cn } from "../../../lib/utils";
 
 interface CartItemProps {
 	itemId: string;
@@ -15,83 +11,164 @@ interface CartItemProps {
 }
 
 export const CartItem: Component<CartItemProps> = (props) => {
-	const { products } = useProducts();
-	const product = () => products().find((p) => p.id === props.itemId);
+	const { getProduct, products } = useProducts();
+	const cart = useCart();
 
-	const itemPrice = () => (product()?.price || 0) * props.quantity;
+	// Create memoized product data
+	const product = createMemo(() => {
+		const currentProducts = products();
+		if (!currentProducts) return null;
+		return currentProducts.find((p) => p.id === props.itemId);
+	});
+
+	// Create memoized price calculation
+	const price = createMemo(() => {
+		const currentProduct = product();
+		if (!currentProduct?.price) return 0;
+		return currentProduct.price * props.quantity;
+	});
+
+	const handleDecrement = () => {
+		cart.updateQuantity(props.itemId, props.quantity - 1);
+	};
+
+	const handleIncrement = () => {
+		cart.updateQuantity(props.itemId, props.quantity + 1);
+	};
+
+	const handleRemove = () => {
+		cart.removeFromCart(props.itemId);
+	};
 
 	return (
-		<div class="flex items-center gap-4 py-4 border-b border-border last:border-0">
-			{/* Product Image */}
-			<div class="w-20 h-20 rounded-md overflow-hidden bg-accent/10">
-				<img
-					src={
-						getProductImageUrl(product()?.code) ||
-						getFallbackImageUrl(product()?.product_name || "Product")
+		<div
+			class={cn(
+				"flex items-center space-x-4 py-4",
+				"motion-safe:hover:bg-accent/5 rounded-lg transition-colors duration-200",
+				"motion-safe:animate-fade-in motion-safe:animate-duration-300"
+			)}
+		>
+			<div
+				class={cn(
+					"relative h-16 w-16 overflow-hidden rounded-lg border bg-muted",
+					"motion-safe:hover:scale-105 transition-transform duration-200"
+				)}
+			>
+				<Show
+					when={product()}
+					fallback={
+						<div class="h-full w-full bg-muted flex items-center justify-center motion-safe:animate-pulse">
+							<span class="text-muted-foreground text-xs">Loading...</span>
+						</div>
 					}
-					alt={product()?.product_name}
-					class="w-full h-full object-cover"
-					onError={(e) => {
-						(e.target as HTMLImageElement).src = getFallbackImageUrl(
-							product()?.product_name || "Product"
-						);
-					}}
-				/>
+				>
+					<img
+						src={product()?.image || getFallbackImageUrl("Product")}
+						alt={product()?.name || "Product"}
+						class={cn(
+							"h-full w-full object-cover",
+							"motion-safe:animate-fade-in motion-safe:animate-duration-500"
+						)}
+						onError={(e) => {
+							const target = e.target as HTMLImageElement;
+							target.src = getFallbackImageUrl(product()?.name || "Product");
+						}}
+					/>
+				</Show>
 			</div>
-
-			{/* Product Details */}
-			<div class="flex-1 min-w-0">
-				<h3 class="text-sm font-medium truncate">{product()?.product_name}</h3>
-				<div class="flex items-center gap-2 mt-1">
-					<p class="text-sm text-muted-foreground">
-						{formatPrice(product()?.price || 0)} each
-					</p>
-					<span class="text-sm text-muted-foreground">×</span>
-					<p class="text-sm font-medium">{props.quantity}</p>
+			<div class="flex-1">
+				<Show
+					when={product()}
+					fallback={
+						<div class="space-y-2">
+							<div class="h-4 w-24 bg-muted rounded motion-safe:animate-pulse" />
+							<div class="h-4 w-16 bg-muted rounded motion-safe:animate-pulse" />
+						</div>
+					}
+				>
+					<h3 class="font-medium motion-safe:animate-fade-down motion-safe:animate-duration-500">
+						{product()?.name}
+					</h3>
+					<div class="flex items-center space-x-2 motion-safe:animate-fade-up motion-safe:animate-duration-500 motion-safe:animate-delay-100">
+						<p class="text-sm text-muted-foreground">
+							{formatCurrency(product()?.price || 0)} × {props.quantity}
+						</p>
+						<p class="text-sm font-medium">= {formatCurrency(price())}</p>
+					</div>
+				</Show>
+				<div class="mt-2 flex items-center space-x-2">
+					<Button
+						variant="outline"
+						size="icon"
+						class={cn(
+							"h-8 w-8",
+							"motion-safe:hover:scale-110 motion-safe:active:scale-95",
+							"transition-transform duration-200"
+						)}
+						onClick={handleDecrement}
+						disabled={props.quantity <= 1}
+					>
+						<span class="sr-only">Decrease quantity</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M5 12h14" />
+						</svg>
+					</Button>
+					<span class="w-8 text-center motion-safe:animate-fade-in motion-safe:animate-duration-200">
+						{props.quantity}
+					</span>
+					<Button
+						variant="outline"
+						size="icon"
+						class={cn(
+							"h-8 w-8",
+							"motion-safe:hover:scale-110 motion-safe:active:scale-95",
+							"transition-transform duration-200"
+						)}
+						onClick={handleIncrement}
+					>
+						<span class="sr-only">Increase quantity</span>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M12 5v14M5 12h14" />
+						</svg>
+					</Button>
 				</div>
-				<p class="text-sm font-semibold mt-1 text-primary">
-					{formatPrice(itemPrice())}
-				</p>
 			</div>
-
-			{/* Quantity Controls */}
-			<div class="flex items-center gap-2">
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() =>
-						cartStore.updateQuantity(props.itemId, props.quantity - 1)
-					}
-					aria-label="Decrease quantity"
-					class="h-8 w-8 p-0"
+			<Button
+				variant="ghost"
+				size="icon"
+				class={cn(
+					"h-8 w-8",
+					"motion-safe:hover:bg-destructive/10 motion-safe:hover:text-destructive",
+					"motion-safe:hover:rotate-90 transition-all duration-200"
+				)}
+				onClick={handleRemove}
+			>
+				<span class="sr-only">Remove item</span>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
 				>
-					-
-				</Button>
-
-				<span class="w-8 text-center text-sm">{props.quantity}</span>
-
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={() =>
-						cartStore.updateQuantity(props.itemId, props.quantity + 1)
-					}
-					aria-label="Increase quantity"
-					class="h-8 w-8 p-0"
-				>
-					+
-				</Button>
-
-				<Button
-					variant="ghost"
-					size="icon"
-					class="text-destructive hover:text-destructive/90 h-8 w-8"
-					onClick={() => cartStore.removeFromCart(props.itemId)}
-					aria-label="Remove item"
-				>
-					<FiTrash2 class="h-4 w-4" />
-				</Button>
-			</div>
+					<path d="M18 6L6 18M6 6l12 12" />
+				</svg>
+			</Button>
 		</div>
 	);
 };

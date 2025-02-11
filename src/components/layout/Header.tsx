@@ -55,8 +55,8 @@ export const Header: Component<HeaderProps> = (props) => {
 			class={cn(
 				"w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
 				"border-b border-border/40",
-				"transition-all duration-200",
 				props.sticky && "sticky top-0 z-50",
+				"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth",
 				props.class
 			)}
 		>
@@ -66,7 +66,7 @@ export const Header: Component<HeaderProps> = (props) => {
 					<div class="flex items-center">
 						<A
 							href="/"
-							class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+							class="text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent"
 							aria-label="Trinity - Home"
 						>
 							Trinity
@@ -78,20 +78,24 @@ export const Header: Component<HeaderProps> = (props) => {
 						class={cn(
 							"hidden md:flex items-center space-x-1",
 							"bg-background/50 backdrop-blur-sm",
-							"px-2 rounded-full border border-border/40"
+							"px-2 rounded-full border border-border/40",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
 						)}
 						aria-label="Main navigation"
 					>
 						<For each={navigationLinks()}>
-							{(route: AppRoute) => (
+							{(route: AppRoute, index) => (
 								<Show when={route.title}>
 									<A
 										href={route.path}
 										class={cn(
-											"relative px-4 py-2 text-sm font-medium transition-colors",
-											"hover:text-primary rounded-full",
-											"data-[active]:text-primary data-[active]:bg-muted"
+											"relative px-4 py-2 text-sm font-medium",
+											"hover:text-primary rounded-full transition-colors duration-200",
+											"data-[active]:text-primary data-[active]:bg-muted",
+											"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300",
+											"motion-safe:motion-delay-[var(--delay)]"
 										)}
+										style={{ "--delay": `${index() * 50}ms` }}
 										end={route.path === "/"}
 									>
 										{route.title}
@@ -102,7 +106,12 @@ export const Header: Component<HeaderProps> = (props) => {
 					</nav>
 
 					{/* Desktop Actions */}
-					<div class="hidden md:flex items-center gap-2">
+					<div
+						class={cn(
+							"hidden md:flex items-center gap-2",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+						)}
+					>
 						<Cart />
 						<ThemeToggle />
 						<Show
@@ -132,7 +141,10 @@ export const Header: Component<HeaderProps> = (props) => {
 										<img
 											src={authStore.currentUser?.avatar}
 											alt={authStore.currentUser?.name}
-											class="h-8 w-8 rounded-full ring-2 ring-background"
+											class={cn(
+												"h-8 w-8 rounded-full ring-2 ring-background",
+												"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+											)}
 										/>
 									</Show>
 								</Button>
@@ -148,7 +160,12 @@ export const Header: Component<HeaderProps> = (props) => {
 					</div>
 
 					{/* Mobile Navigation Controls */}
-					<div class="flex md:hidden items-center gap-2">
+					<div
+						class={cn(
+							"flex md:hidden items-center gap-2",
+							"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+						)}
+					>
 						<Show when={authStore.isAuthenticated}>
 							<Button
 								variant="ghost"
@@ -164,7 +181,10 @@ export const Header: Component<HeaderProps> = (props) => {
 									<img
 										src={authStore.currentUser?.avatar}
 										alt={authStore.currentUser?.name}
-										class="h-8 w-8 rounded-full ring-2 ring-background"
+										class={cn(
+											"h-8 w-8 rounded-full ring-2 ring-background",
+											"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+										)}
 									/>
 								</Show>
 							</Button>
@@ -177,7 +197,7 @@ export const Header: Component<HeaderProps> = (props) => {
 							onClick={toggleMobileMenu}
 							aria-controls="mobile-menu"
 							aria-expanded={isMobileMenuOpen()}
-							class="rounded-full"
+							class="rounded-full transition-transform duration-200"
 						>
 							<span class="sr-only">Open main menu</span>
 							<Show
@@ -196,8 +216,10 @@ export const Header: Component<HeaderProps> = (props) => {
 						id="mobile-menu"
 						class={cn(
 							"md:hidden border-t border-border/40",
-							"animate-in slide-in-from-top",
-							"bg-background/95 backdrop-blur"
+							"bg-background/95 backdrop-blur",
+							isMobileMenuOpen()
+								? "motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
+								: "motion-safe:motion-translate-y-out-100 motion-safe:motion-duration-200"
 						)}
 					>
 						<nav
@@ -205,15 +227,18 @@ export const Header: Component<HeaderProps> = (props) => {
 							aria-label="Mobile navigation"
 						>
 							<For each={navigationLinks()}>
-								{(route: AppRoute) => (
+								{(route: AppRoute, index) => (
 									<Show when={route.title}>
 										<A
 											href={route.path}
 											class={cn(
-												"px-4 py-2 text-sm font-medium transition-colors",
-												"hover:text-primary hover:bg-muted rounded-lg",
-												"data-[active]:text-primary data-[active]:bg-muted"
+												"px-4 py-2 text-sm font-medium",
+												"hover:text-primary hover:bg-muted rounded-lg transition-colors duration-200",
+												"data-[active]:text-primary data-[active]:bg-muted",
+												"motion-safe:motion-translate-x-in-25 motion-safe:motion-duration-300",
+												"motion-safe:motion-delay-[var(--delay)]"
 											)}
+											style={{ "--delay": `${index() * 50}ms` }}
 											end={route.path === "/"}
 											onClick={toggleMobileMenu}
 										>
@@ -227,7 +252,10 @@ export const Header: Component<HeaderProps> = (props) => {
 								fallback={
 									<Button
 										variant="outline"
-										class="mx-4 mt-3 shadow-sm"
+										class={cn(
+											"mx-4 mt-3 shadow-sm",
+											"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
+										)}
 										onClick={() => {
 											handleLogout();
 											toggleMobileMenu();
@@ -239,7 +267,10 @@ export const Header: Component<HeaderProps> = (props) => {
 							>
 								<Button
 									variant="outline"
-									class="mx-4 mt-3 shadow-sm"
+									class={cn(
+										"mx-4 mt-3 shadow-sm",
+										"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
+									)}
 									onClick={() => {
 										navigate("/login");
 										toggleMobileMenu();

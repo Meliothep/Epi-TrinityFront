@@ -217,24 +217,225 @@ const darkModeExamples = {
 
 ## 🎭 Animation & Transitions
 
+### Motion Utilities
+
 ```typescript
-const animations = {
-  transition: 'transition-all duration-200',
-  fade: 'transition-opacity duration-200',
-  scale: 'transition-transform duration-200',
-  
-  hover: {
-    scale: 'hover:scale-105',
-    brightness: 'hover:brightness-110',
-    opacity: 'hover:opacity-80',
+const motionUtilities = {
+  // Base animations
+  opacity: {
+    fadeIn: "motion-opacity-in-0",
+    fadeOut: "motion-opacity-out-0"
+  },
+  translate: {
+    slideUp: "motion-translate-y-in-100",
+    slideDown: "motion-translate-y-out-100",
+    slideRight: "motion-translate-x-in-100",
+    slideLeft: "motion-translate-x-out-100"
+  },
+  scale: {
+    scaleUp: "motion-scale-in-75",
+    scaleDown: "motion-scale-out-75"
+  },
+  rotate: {
+    rotateIn: "motion-rotate-in-180",
+    rotateOut: "motion-rotate-out-180"
   },
   
-  keyframes: {
-    slideDown: 'slideDown 0.2s ease-out',
-    slideUp: 'slideUp 0.2s ease-in',
-    fadeIn: 'fadeIn 0.2s ease-out',
-    fadeOut: 'fadeOut 0.2s ease-in',
+  // Presets
+  presets: {
+    pulse: "motion-preset-pulse-sm",
+    bounce: "motion-preset-bounce",
+    slide: "motion-preset-slide-up"
   },
+  
+  // Modifiers
+  modifiers: {
+    duration: {
+      fast: "motion-duration-200",
+      normal: "motion-duration-300",
+      slow: "motion-duration-500"
+    },
+    delay: {
+      short: "motion-delay-100",
+      medium: "motion-delay-300",
+      long: "motion-delay-500"
+    },
+    easing: {
+      spring: {
+        smooth: "motion-ease-spring-smooth",
+        bouncy: "motion-ease-spring-bouncy",
+        snappy: "motion-ease-spring-snappy"
+      },
+      standard: "motion-ease-in-quart"
+    },
+    loop: {
+      infinite: "motion-translate-y-loop-25",
+      reset: "motion-translate-y-loop-25/reset",
+      twice: "motion-loop-twice"
+    }
+  }
+}
+
+// Usage examples
+const examples = {
+  // Modal backdrop
+  backdrop: cn(
+    "fixed inset-0 bg-background/80 backdrop-blur-sm z-50",
+    "motion-opacity-in-0 motion-duration-200"
+  ),
+  
+  // Modal panel
+  panel: cn(
+    "fixed right-0 top-0 h-full w-full max-w-md border-l bg-background p-6",
+    "motion-translate-x-in-100 motion-duration-300"
+  ),
+  
+  // Interactive button
+  button: cn(
+    "rounded-full relative",
+    "motion-preset-pulse-sm motion-ease-spring-smooth"
+  ),
+  
+  // List item with staggered animation
+  listItem: (index: number) => cn(
+    "motion-preset-slide-up",
+    { style: { "--motion-delay": `${index * 100}ms` } }
+  ),
+  
+  // Loading states
+  loading: {
+    skeleton: "motion-preset-pulse-sm",
+    spinner: "motion-rotate-loop-360",
+    shimmer: "motion-translate-x-loop-100"
+  }
+}
+```
+
+### Component-Specific Patterns
+
+1. **Modal/Dialog**
+```typescript
+const modalStyles = {
+  overlay: cn(
+    "fixed inset-0 bg-background/80 backdrop-blur-sm z-50",
+    "motion-opacity-in-0 motion-duration-200"
+  ),
+  content: cn(
+    "fixed right-0 top-0 h-full w-full max-w-md border-l bg-background",
+    "motion-translate-x-in-100 motion-duration-300 motion-ease-spring-smooth"
+  )
+}
+```
+
+2. **Dropdown Menu**
+```typescript
+const dropdownStyles = {
+  trigger: cn(
+    "inline-flex items-center justify-center",
+    "motion-preset-pulse-sm motion-ease-spring-smooth"
+  ),
+  content: cn(
+    "absolute top-full mt-2 w-48 rounded-md bg-popover shadow-md",
+    "motion-translate-y-in-25 motion-duration-200"
+  )
+}
+```
+
+3. **Cart Item**
+```typescript
+const cartItemStyles = {
+  container: cn(
+    "flex items-center space-x-4 py-4",
+    "motion-preset-slide-up motion-duration-300"
+  ),
+  image: cn(
+    "relative h-16 w-16 overflow-hidden rounded-lg border",
+    "motion-scale-in-95 motion-duration-200"
+  ),
+  removeButton: cn(
+    "h-8 w-8",
+    "motion-rotate-in-90 motion-duration-200"
+  )
+}
+```
+
+### Loading States
+
+```typescript
+const loadingStyles = {
+  skeleton: cn(
+    "h-4 bg-muted rounded",
+    "motion-preset-pulse-sm"
+  ),
+  spinner: cn(
+    "w-5 h-5 border-2 border-primary rounded-full",
+    "motion-rotate-loop-360"
+  ),
+  shimmer: cn(
+    "relative overflow-hidden",
+    "motion-translate-x-loop-100"
+  )
+}
+```
+
+### Property-Specific Modifiers
+
+```typescript
+// Apply different delays to different properties
+const staggeredAnimation = cn(
+  "motion-delay-500/rotate motion-rotate-in-180",
+  "motion-opacity-in-0"  // Immediate fade
+)
+
+// Different durations for different properties
+const mixedDuration = cn(
+  "motion-duration-300/translate motion-translate-y-in-100",
+  "motion-duration-500/opacity motion-opacity-in-0"
+)
+```
+
+### Best Practices
+
+1. **Animation Timing**
+```typescript
+const timingPatterns = {
+  // Entry animations
+  entry: "motion-duration-300 motion-ease-spring-smooth",
+  
+  // Exit animations
+  exit: "motion-duration-200 motion-ease-spring-snappy",
+  
+  // Hover states
+  hover: "motion-duration-200 motion-ease-spring-smooth",
+  
+  // Loading states
+  loading: "motion-preset-pulse-sm"
+}
+```
+
+2. **Performance**
+```typescript
+// ✅ Good: Hardware-accelerated properties
+const goodPerformance = {
+  transform: "motion-translate-y-in-100",
+  opacity: "motion-opacity-in-0"
+}
+
+// ❌ Bad: Layout-triggering properties
+const badPerformance = {
+  height: "h-0 hover:h-full transition-all",
+  width: "w-0 hover:w-full transition-all"
+}
+```
+
+3. **Accessibility**
+```typescript
+// The plugin automatically handles reduced motion preferences
+// No need for manual motion-safe: prefixes
+const accessibleAnimation = {
+  button: "motion-preset-pulse-sm",
+  modal: "motion-translate-y-in-25",
+  list: "motion-preset-slide-up"
 }
 ```
 

@@ -21,7 +21,10 @@ export const Select: Component<SelectProps> = (props) => {
 	return (
 		<select
 			class={cn(
-				"flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+				"flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+				"motion-safe:motion-duration-200 motion-safe:motion-ease-spring-2",
+				"hover:motion-safe:motion-scale-101 hover:motion-safe:motion-translate-y-neg-1",
+				"focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:motion-safe:motion-scale-101",
 				props.class
 			)}
 			value={props.value}
@@ -29,9 +32,18 @@ export const Select: Component<SelectProps> = (props) => {
 			disabled={props.disabled}
 			aria-label={props.label || props.placeholder || "Select an option"}
 		>
-			<option value="">{props.placeholder || "Select an option..."}</option>
+			<option value="" class="text-muted-foreground">
+				{props.placeholder || "Select an option..."}
+			</option>
 			<For each={props.options}>
-				{(option) => <option value={option.value}>{option.label}</option>}
+				{(option) => (
+					<option
+						value={option.value}
+						class="motion-safe:motion-duration-200 motion-safe:motion-ease-spring-2 hover:motion-safe:motion-scale-101"
+					>
+						{option.label}
+					</option>
+				)}
 			</For>
 		</select>
 	);

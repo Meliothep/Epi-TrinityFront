@@ -4,6 +4,7 @@
 
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { formatCurrency } from './format';
 
 // Utility for merging Tailwind classes
 export function cn(...inputs: ClassValue[]) {
@@ -65,12 +66,7 @@ export const getFallbackImageUrl = (text: string = "No Image"): string => {
 
 // Format price with currency
 export const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(price);
+  return formatCurrency(price);
 };
 
 // Format nutrition value

@@ -10,6 +10,7 @@ This guide provides detailed information about the features implemented in the T
 4. [Loading States](#loading-states)
 5. [Routing System](#routing-system)
 6. [Theme System](#theme-system)
+7. [Animation System](#animation-system)
 
 ## Component Architecture
 
@@ -322,6 +323,230 @@ const ThemeToggle = () => {
 - Accent: `bg-accent text-accent-foreground`
 - Muted: `bg-muted text-muted-foreground`
 - Card: `bg-card text-card-foreground`
+
+## 🎭 Animation System
+
+Trinity uses the `tailwindcss-motion` plugin to provide subtle, purposeful animations that enhance the user experience without being overwhelming. Our animation system follows these key principles:
+
+1. **Purposeful**: Each animation serves a specific function
+2. **Subtle**: Animations are gentle and non-distracting
+3. **Consistent**: Similar interactions use similar animations
+4. **Accessible**: All animations respect user motion preferences
+
+### Core Animation Patterns
+
+```typescript
+// Entry Animations - Subtle and functional
+const entryAnimations = {
+  // Gentle fade in
+  fadeIn: "motion-safe:motion-opacity-in-0 motion-safe:motion-duration-300",
+  
+  // Subtle slide up
+  slideUp: "motion-safe:motion-translate-y-in-25 motion-safe:motion-duration-300",
+  
+  // Smooth scale in
+  scaleIn: "motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+}
+
+// Interactive States - Minimal and responsive
+const interactiveStates = {
+  // Simple color transitions
+  hover: "transition-colors duration-200",
+  
+  // Subtle scale feedback
+  active: "active:motion-safe:motion-scale-95",
+  
+  // Gentle transform
+  focus: "focus:motion-safe:motion-translate-y-neg-1"
+}
+
+// Transition Animations - Smooth and natural
+const transitions = {
+  // Natural spring easing
+  spring: "motion-safe:motion-ease-spring-smooth",
+  
+  // Quick and subtle
+  quick: "motion-safe:motion-duration-200",
+  
+  // Smooth and deliberate
+  smooth: "motion-safe:motion-duration-300"
+}
+```
+
+### Best Practices
+
+1. **Keep Animations Minimal**
+```typescript
+// ✅ Good: Simple, purposeful animation
+const goodExample = {
+  button: "transition-colors duration-200 hover:bg-accent",
+  modal: "motion-safe:motion-scale-in-95 motion-safe:motion-duration-300",
+  menu: "motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-200"
+}
+
+// ❌ Bad: Excessive, distracting animations
+const badExample = {
+  button: "motion-preset-pulse hover:motion-scale-110 hover:motion-rotate-12",
+  modal: "motion-preset-bounce motion-duration-500 motion-delay-300",
+  menu: "motion-preset-shake motion-loop-infinite"
+}
+```
+
+2. **Use Consistent Timing**
+```typescript
+const timingGuidelines = {
+  // Quick transitions
+  hover: "duration-200",
+  
+  // Standard animations
+  entry: "motion-safe:motion-duration-300",
+  
+  // Complex transitions
+  exit: "motion-safe:motion-duration-200"
+}
+```
+
+3. **Respect Motion Preferences**
+```typescript
+// Always use motion-safe prefix
+const accessibleAnimations = {
+  entry: "motion-safe:motion-translate-y-in-0",
+  hover: "hover:motion-safe:motion-scale-102",
+  active: "active:motion-safe:motion-scale-95"
+}
+```
+
+### Common Use Cases
+
+1. **Navigation Elements**
+```typescript
+const navExample = {
+  // Subtle entry animation
+  container: cn(
+    "bg-background/50 backdrop-blur-sm",
+    "motion-safe:motion-translate-y-in-0",
+    "motion-safe:motion-duration-300"
+  ),
+  
+  // Simple hover state
+  link: cn(
+    "transition-colors duration-200",
+    "hover:text-primary"
+  )
+}
+```
+
+2. **Modal/Dialog**
+```typescript
+const modalExample = {
+  // Subtle backdrop fade
+  backdrop: cn(
+    "bg-background/80 backdrop-blur-sm",
+    "motion-safe:motion-opacity-in-0",
+    "motion-safe:motion-duration-200"
+  ),
+  
+  // Gentle scale animation
+  content: cn(
+    "bg-background p-6",
+    "motion-safe:motion-scale-in-95",
+    "motion-safe:motion-duration-300",
+    "motion-safe:motion-ease-spring-smooth"
+  )
+}
+```
+
+3. **Interactive Elements**
+```typescript
+const buttonExample = {
+  // Simple, effective feedback
+  base: cn(
+    "rounded-md px-4 py-2",
+    "transition-colors duration-200",
+    "hover:bg-accent",
+    "active:motion-safe:motion-scale-95"
+  )
+}
+```
+
+### Animation Timing Guidelines
+
+```typescript
+const timings = {
+  // Instant feedback
+  hover: "duration-200",
+  active: "duration-150",
+  
+  // Smooth transitions
+  entry: "motion-safe:motion-duration-300",
+  exit: "motion-safe:motion-duration-200",
+  
+  // Complex animations
+  stagger: "motion-safe:motion-delay-[var(--delay)]" // 50ms increments
+}
+```
+
+### Performance Considerations
+
+1. **Optimize for Rendering**
+```typescript
+// ✅ Good: Use transform and opacity
+const performant = {
+  scale: "motion-safe:motion-scale-95",
+  fade: "motion-safe:motion-opacity-in-0",
+  move: "motion-safe:motion-translate-y-in-25"
+}
+
+// ❌ Bad: Animate expensive properties
+const expensive = {
+  height: "transition-[height]",
+  boxShadow: "transition-[box-shadow]",
+  filter: "transition-[filter]"
+}
+```
+
+2. **Reduce Animation Load**
+```typescript
+// ✅ Good: Minimal, purposeful animations
+const minimal = {
+  card: "transition-transform hover:motion-safe:motion-translate-y-neg-1",
+  button: "transition-colors hover:bg-accent"
+}
+
+// ❌ Bad: Multiple simultaneous animations
+const overwhelming = {
+  card: "motion-preset-pulse motion-preset-bounce motion-preset-spin",
+  button: "hover:motion-scale-110 hover:motion-rotate-12 hover:motion-translate-y-neg-2"
+}
+```
+
+### Examples from Trinity
+
+1. **Header Navigation**
+```typescript
+// Subtle entry animation
+"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300"
+
+// Simple hover states
+"hover:text-primary transition-colors duration-200"
+
+// Mobile menu transition
+"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300"
+```
+
+2. **Interactive Components**
+```typescript
+// Button states
+"transition-colors duration-200 hover:bg-accent active:motion-safe:motion-scale-95"
+
+// Avatar loading
+"motion-safe:motion-scale-in-95 motion-safe:motion-duration-300"
+
+// Theme toggle
+"transition-transform duration-200"
+```
+
+These guidelines ensure that animations enhance the user experience while maintaining a professional, polished feel throughout the application.
 
 ## Best Practices
 

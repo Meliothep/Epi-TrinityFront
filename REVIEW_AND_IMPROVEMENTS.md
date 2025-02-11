@@ -175,29 +175,71 @@ export const Component: Component<Props> = (props) => {
 ### Store Pattern
 
 ```typescript
-// Example of ideal store pattern
-export const createStore = () => {
-  // 1. State
-  const [state, setState] = createSignal(initialState);
-  
-  // 2. Computed values
-  const computed = createMemo(() => {
-    // Computation
-  });
-  
-  // 3. Actions
-  const actions = {
-    update: (payload: Payload) => {
-      // Update logic
+// Example of ideal store pattern with proper reactive context handling
+
+// 1. Types
+interface StoreState {
+  theme: 'light' | 'dark';
+  isMobileMenuOpen: boolean;
+}
+
+// 2. Initial state loading with error handling
+const loadInitialState = () => {
+  try {
+    const stored = localStorage.getItem('store-key');
+    if (stored) {
+      return JSON.parse(stored);
     }
-  };
-  
-  // 4. Public API
+  } catch (error) {
+    console.error('Failed to load state:', error);
+  }
+  return defaultState;
+};
+
+// 3. State signals
+const [theme, setTheme] = createSignal(initialState.theme);
+const [isMobileMenuOpen, setIsMobileMenuOpen] = createSignal(initialState.isMobileMenuOpen);
+
+// 4. Actions
+const actions = {
+  toggleTheme: () => setTheme(prev => prev === 'light' ? 'dark' : 'light'),
+  toggleMenu: () => setIsMobileMenuOpen(prev => !prev),
+};
+
+// 5. Persistence hook (used within components)
+export const usePersistentStore = () => {
+  createEffect(() => {
+    const state = {
+      theme: theme(),
+      isMobileMenuOpen: isMobileMenuOpen(),
+    };
+    localStorage.setItem('store-key', JSON.stringify(state));
+  });
+};
+
+// 6. Store hook
+export const useStore = () => {
   return {
-    state,
-    computed,
-    ...actions
+    // State getters
+    theme,
+    isMobileMenuOpen,
+    // Actions
+    ...actions,
   };
+};
+
+// Usage in components:
+const MyComponent = () => {
+  const store = useStore();
+  // Initialize persistence if needed
+  usePersistentStore();
+
+  return (
+    <div>
+      <h1>Current theme: {store.theme()}</h1>
+      <button onClick={store.toggleTheme}>Toggle Theme</button>
+    </div>
+  );
 };
 ```
 
@@ -256,7 +298,16 @@ export const createStore = () => {
   - Implemented middleware system for store enhancements
   - Added store hooks for component integration
   - Created example UI store with new system
-- [ ] Testing setup (In Progress)
+- [ ] Store standardization (In Progress)
+  - [x] Refactor cart store to use createStore utility
+  - [x] Implement proper middleware system for cart store
+  - [x] Add proper type safety to cart store
+  - [x] Add proper error handling to cart store
+  - [x] Add proper persistence to cart store
+  - [x] Update Cart and CartItem components to use new store pattern
+  - [ ] Refactor remaining stores (auth, products, favorites, etc.)
+  - [ ] Add tests for store implementations
+- [ ] Testing setup (Pending)
   - [ ] Setup Vitest configuration
   - [ ] Add testing utilities and helpers
   - [ ] Implement component testing patterns
@@ -1811,70 +1862,9 @@ export function createWrapper(component: Component) {
 }
 
 export function createTestStore<T>(initialState: T) {
-  return createStore({
-    initialState,
-    middleware: [/* test middleware */]
-  });
+  return createStore(initialState);
 }
 ```
 
 #### 3. Component Testing Pattern
-```typescript
-// src/components/Button/Button.test.tsx
-describe('Button', () => {
-  it('renders correctly', () => {
-    const { getByRole } = createWrapper(
-      <Button>Click me</Button>
-    );
-    
-    expect(getByRole('button')).toBeInTheDocument();
-  });
-
-  it('handles click events', () => {
-    const onClickMock = vi.fn();
-    const { getByRole } = createWrapper(
-      <Button onClick={onClickMock}>Click me</Button>
-    );
-    
-    getByRole('button').click();
-    expect(onClickMock).toHaveBeenCalled();
-  });
-});
 ```
-
-#### 4. Store Testing Pattern
-```typescript
-// src/stores/ui.store.test.ts
-describe('UI Store', () => {
-  it('updates theme correctly', () => {
-    const { result } = renderHook(() => useUI());
-    
-    act(() => {
-      result.current.toggleTheme();
-    });
-    
-    expect(result.current.theme).toBe('dark');
-  });
-});
-```
-
-#### 5. E2E Testing Setup
-```typescript
-// e2e/navigation.spec.ts
-test('user can navigate through protected routes', async ({ page }) => {
-  await page.goto('/');
-  await page.login(); // Custom helper
-  
-  await page.click('text=Dashboard');
-  await expect(page).toHaveURL('/dashboard');
-  
-  await expect(page.locator('h1')).toHaveText('Dashboard');
-});
-```
-
-Next Steps:
-1. Set up Vitest with the configuration above
-2. Create test utilities and helpers
-3. Implement first component tests
-4. Add store testing utilities
-5. Set up Playwright for E2E testing
