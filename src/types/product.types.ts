@@ -12,7 +12,8 @@ export interface Nutrition {
     sodium_100g: number;
 }
 
-export interface Product {
+// API Data Transfer Objects
+export interface ProductDTO {
     id: string;
     code: string;
     product_name: string;
@@ -49,6 +50,94 @@ export interface Product {
     states_en: string[];
     main_category?: string;
     main_category_en?: string;
+}
+
+// View Models for UI representation
+export interface ProductViewModel {
+    id: string;
+    code: string;
+    name: string;
+    description?: string;
+    quantity: string;
+    brands: string[];
+    mainCategory?: string;
+    allergens: string[];
+    ingredients: string;
+    nutritionGrade: string;
+    novaGroup?: number;
+    imageUrl: string;
+    thumbnailUrl: string;
+    ingredientsImageUrl?: string;
+    nutritionImageUrl?: string;
+    servingSize?: string;
+    servingQuantity?: number;
+    nutrition: NutritionViewModel;
+    labels: string[];
+    origins: string[];
+    lastModified: Date;
+}
+
+export interface NutritionViewModel {
+    energyKcal: number;
+    energyKj: number;
+    proteins: number;
+    carbohydrates: number;
+    sugars: number;
+    fat: number;
+    saturatedFat: number;
+    fiber: number;
+    salt: number;
+    sodium: number;
+}
+
+// Keep the existing Product interface for backward compatibility
+export interface Product {
+    id: string;
+    code: string;
+    product_name: string;
+    quantity: string;
+    packaging?: string[];
+    packaging_tags?: string[];
+    brands: string[];
+    categories: string[];
+    categories_tags: string[];
+    categories_en: string[];
+    origins: string[];
+    labels?: string[];
+    labels_tags?: string[];
+    labels_en?: string[];
+    allergens?: string[];
+    ingredients_text: string;
+    nutrition: {
+        energy_kcal_100g: number;
+        energy_kj_100g: number;
+        proteins_100g: number;
+        carbohydrates_100g: number;
+        sugars_100g: number;
+        fat_100g: number;
+        saturated_fat_100g: number;
+        fiber_100g: number;
+        salt_100g: number;
+        sodium_100g: number;
+    };
+    nutrition_grade: string;
+    nova_group?: number;
+    image_url: string;
+    image_small_url: string;
+    image_ingredients_url?: string;
+    image_nutrition_url?: string;
+    created_t: number;
+    last_modified_t: number;
+    serving_size?: string;
+    serving_quantity?: number;
+    additives_n?: number;
+    additives_tags?: string[];
+    states_tags: string[];
+    states_en: string[];
+    main_category?: string;
+    main_category_en?: string;
+    price: number;
+    product_tags?: string[];
 }
 
 export interface NutritionFacts {
@@ -145,4 +234,44 @@ export const DEFAULT_DISPLAY_CONFIG: ProductDisplayConfig = {
         'fiber_100g',
         'sodium_100g'
     ]
-}; 
+};
+
+// Mapper functions
+export class ProductMapper {
+    static toViewModel(dto: ProductDTO): ProductViewModel {
+        return {
+            id: dto.id,
+            code: dto.code,
+            name: dto.product_name,
+            description: dto.generic_name,
+            quantity: dto.quantity,
+            brands: dto.brands,
+            mainCategory: dto.main_category_en,
+            allergens: dto.allergens || [],
+            ingredients: dto.ingredients_text,
+            nutritionGrade: dto.nutrition_grade,
+            novaGroup: dto.nova_group,
+            imageUrl: dto.image_url,
+            thumbnailUrl: dto.image_small_url,
+            ingredientsImageUrl: dto.image_ingredients_url,
+            nutritionImageUrl: dto.image_nutrition_url,
+            servingSize: dto.serving_size,
+            servingQuantity: dto.serving_quantity,
+            nutrition: {
+                energyKcal: dto.nutrition.energy_kcal_100g,
+                energyKj: dto.nutrition.energy_kj_100g,
+                proteins: dto.nutrition.proteins_100g,
+                carbohydrates: dto.nutrition.carbohydrates_100g,
+                sugars: dto.nutrition.sugars_100g,
+                fat: dto.nutrition.fat_100g,
+                saturatedFat: dto.nutrition.saturated_fat_100g,
+                fiber: dto.nutrition.fiber_100g,
+                salt: dto.nutrition.salt_100g,
+                sodium: dto.nutrition.sodium_100g,
+            },
+            labels: dto.labels || [],
+            origins: dto.origins,
+            lastModified: new Date(dto.last_modified_t * 1000),
+        };
+    }
+} 

@@ -1,5 +1,5 @@
 import { ProductService, ServiceConfig } from "../../types/services";
-import { Product } from "../../stores/products.store";
+import { ProductDTO, ProductViewModel, ProductMapper } from "../../types/product.types";
 
 export class ApiProductService implements ProductService {
     private baseUrl: string;
@@ -28,13 +28,15 @@ export class ApiProductService implements ProductService {
         return response.json();
     }
 
-    async getProducts(): Promise<Product[]> {
-        return this.fetchWithAuth("/products");
+    async getProducts(): Promise<ProductViewModel[]> {
+        const products = await this.fetchWithAuth("/products") as ProductDTO[];
+        return products.map(ProductMapper.toViewModel);
     }
 
-    async getProduct(id: string): Promise<Product | null> {
+    async getProduct(id: string): Promise<ProductViewModel | null> {
         try {
-            return await this.fetchWithAuth(`/products/${id}`);
+            const product = await this.fetchWithAuth(`/products/${id}`) as ProductDTO;
+            return ProductMapper.toViewModel(product);
         } catch (error) {
             if ((error as any)?.response?.status === 404) {
                 return null;
@@ -43,7 +45,8 @@ export class ApiProductService implements ProductService {
         }
     }
 
-    async searchProducts(query: string): Promise<Product[]> {
-        return this.fetchWithAuth(`/products/search?q=${encodeURIComponent(query)}`);
+    async searchProducts(query: string): Promise<ProductViewModel[]> {
+        const products = await this.fetchWithAuth(`/products/search?q=${encodeURIComponent(query)}`) as ProductDTO[];
+        return products.map(ProductMapper.toViewModel);
     }
 } 

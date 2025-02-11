@@ -12,6 +12,7 @@ import {
 	formatNutritionValue,
 } from "../lib/utils";
 import type { Product } from "../types/product.types";
+import { ProductCard } from "../components/features/products/ProductCard";
 
 const Products: Component = () => {
 	const navigate = useNavigate();
@@ -194,7 +195,7 @@ const Products: Component = () => {
 								<div class="p-4 space-y-3">
 									<div class="h-4 bg-muted rounded w-3/4" />
 									<div class="h-4 bg-muted rounded w-1/2" />
-									<div class="h-8 bg-muted rounded" />
+									<div class="h-4 bg-muted rounded w-1/4" />
 								</div>
 							</Card>
 						)}
@@ -206,85 +207,7 @@ const Products: Component = () => {
 			<Show when={!loading() && !error()}>
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 					<For each={filteredProducts()}>
-						{(product) => (
-							<Card
-								class="cursor-pointer transition-transform hover:scale-[1.02]"
-								onClick={() => navigate(`/products/${product.id}`)}
-							>
-								<div class="aspect-square relative">
-									<img
-										src={
-											getProductImageUrl(product.code) ||
-											getFallbackImageUrl(product.product_name)
-										}
-										alt={product.product_name}
-										class="w-full h-full object-cover rounded-t-lg"
-										onError={(e) => {
-											(e.target as HTMLImageElement).src = getFallbackImageUrl(
-												product.product_name
-											);
-										}}
-									/>
-									<Show
-										when={
-											product.nutrition_grade &&
-											product.nutrition_grade !== "not-applicable"
-										}
-									>
-										<div class="absolute top-2 right-2">
-											<span
-												class={`inline-flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg text-white ${
-													product.nutrition_grade === "unknown"
-														? "bg-gray-500"
-														: product.nutrition_grade === "a"
-														? "bg-green-500"
-														: product.nutrition_grade === "b"
-														? "bg-lime-500"
-														: product.nutrition_grade === "c"
-														? "bg-yellow-500"
-														: product.nutrition_grade === "d"
-														? "bg-orange-500"
-														: "bg-red-500"
-												}`}
-											>
-												{product.nutrition_grade === "unknown"
-													? "?"
-													: product.nutrition_grade.toUpperCase()}
-											</span>
-										</div>
-									</Show>
-								</div>
-								<div class="p-4 space-y-2">
-									<h3 class="font-semibold truncate">{product.product_name}</h3>
-									<p class="text-sm text-muted-foreground truncate">
-										{product.brands.join(", ")}
-									</p>
-									<div class="flex items-center justify-between">
-										<div class="text-sm text-muted-foreground">
-											{product.quantity}
-										</div>
-										<Show when={product.nutrition.energy_kcal_100g > 0}>
-											<div class="text-sm">
-												{formatNutritionValue(
-													product.nutrition.energy_kcal_100g,
-													"kcal",
-													0
-												)}
-											</div>
-										</Show>
-									</div>
-									<Show when={product.labels && product.labels.length > 0}>
-										<div class="flex flex-wrap gap-1 mt-2">
-											{product.labels.slice(0, 3).map((label) => (
-												<span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-													{label}
-												</span>
-											))}
-										</div>
-									</Show>
-								</div>
-							</Card>
-						)}
+						{(product) => <ProductCard product={product} showQuickActions />}
 					</For>
 				</div>
 			</Show>

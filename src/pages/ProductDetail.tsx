@@ -2,14 +2,17 @@ import { Component, createEffect, createResource, Show } from "solid-js";
 import { useParams, useNavigate } from "@solidjs/router";
 import { useProducts } from "../stores/products.store";
 import { cartStore } from "../stores/cart.store";
+import { favoritesStore } from "../stores/favorites.store";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/common/Card";
 import {
 	getProductImageUrl,
 	getFallbackImageUrl,
 	formatNutritionValue,
+	formatPrice,
 } from "../lib/utils";
 import type { Product } from "../types/product.types";
+import { FiHeart } from "solid-icons/fi";
 
 const ProductDetail: Component = () => {
 	const params = useParams();
@@ -104,7 +107,7 @@ const ProductDetail: Component = () => {
 							<Card class="p-6">
 								<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 									{/* Product Image */}
-									<div class="aspect-square">
+									<div class="aspect-square relative">
 										<img
 											src={
 												getProductImageUrl(data.code) ||
@@ -117,31 +120,14 @@ const ProductDetail: Component = () => {
 													getFallbackImageUrl(data.product_name);
 											}}
 										/>
-									</div>
-
-									{/* Product Info */}
-									<div class="space-y-6">
-										{/* Basic Info */}
-										<div>
-											<h1 class="text-3xl font-bold mb-2">
-												{data.product_name}
-											</h1>
-											<p class="text-muted-foreground">
-												{data.generic_name || data.categories?.[0]}
-											</p>
-											<div class="mt-2 text-sm text-muted-foreground">
-												{data.quantity}
-											</div>
-										</div>
-
-										{/* Nutrition Score */}
+										{/* Nutrition Grade Badge */}
 										<Show
 											when={
 												data.nutrition_grade &&
 												data.nutrition_grade !== "not-applicable"
 											}
 										>
-											<div class="flex items-center gap-3">
+											<div class="absolute top-2 right-2">
 												<span
 													class={`inline-flex items-center justify-center w-12 h-12 rounded-full font-bold text-xl text-white ${
 														data.nutrition_grade === "unknown"
@@ -161,16 +147,66 @@ const ProductDetail: Component = () => {
 														? "?"
 														: data.nutrition_grade.toUpperCase()}
 												</span>
-												<div>
-													<div class="font-semibold">Nutri-Score</div>
-													<div class="text-sm text-muted-foreground">
-														{data.nutrition_grade === "unknown"
-															? "Not Known"
-															: "Nutrition Grade"}
-													</div>
-												</div>
 											</div>
 										</Show>
+									</div>
+
+									{/* Product Info */}
+									<div class="space-y-6">
+										{/* Basic Info */}
+										<div>
+											<h1 class="text-3xl font-bold mb-2">
+												{data.product_name}
+											</h1>
+											<p class="text-muted-foreground">
+												{data.generic_name || data.categories?.[0]}
+											</p>
+											<div class="mt-2 text-sm text-muted-foreground">
+												{data.quantity}
+											</div>
+										</div>
+
+										{/* Price and Actions */}
+										<div class="space-y-4">
+											<div class="flex items-center gap-4">
+												<span class="text-3xl font-bold text-primary">
+													{formatPrice(data.price)}
+												</span>
+												<Show when={data.quantity}>
+													<span class="text-sm text-muted-foreground">
+														per {data.quantity}
+													</span>
+												</Show>
+											</div>
+											<div class="flex gap-4">
+												<Button
+													size="lg"
+													class="flex-1"
+													onClick={() => cartStore.addToCart(data.id)}
+												>
+													Add to Cart
+												</Button>
+												<Button
+													size="lg"
+													variant="outline"
+													class={`${
+														favoritesStore.isFavorite(data.id)
+															? "text-red-500"
+															: ""
+													}`}
+													onClick={() => favoritesStore.toggleFavorite(data.id)}
+													title="Add to Favorites"
+												>
+													<FiHeart
+														class={`h-5 w-5 ${
+															favoritesStore.isFavorite(data.id)
+																? "fill-current"
+																: ""
+														}`}
+													/>
+												</Button>
+											</div>
+										</div>
 
 										{/* Key Nutrition Facts */}
 										<Show
@@ -256,15 +292,6 @@ const ProductDetail: Component = () => {
 												</p>
 											</div>
 										</Show>
-
-										{/* Add to Cart */}
-										<Button
-											size="lg"
-											class="w-full"
-											onClick={() => cartStore.addToCart(data.id)}
-										>
-											Add to Cart
-										</Button>
 
 										{/* Additional Info */}
 										<div class="grid grid-cols-2 gap-4 text-sm text-muted-foreground pt-4 border-t">

@@ -41,7 +41,9 @@ export const mockProducts: Product[] = [
         created_t: 1580066482,
         last_modified_t: 1737247862,
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
-        states_en: ["To be completed", "Nutrition facts completed"]
+        states_en: ["To be completed", "Nutrition facts completed"],
+        price: 4.99,
+        product_tags: ["chocolate", "sweets", "premium", "gift"]
     },
     {
         id: "00000001",
@@ -74,16 +76,13 @@ export const mockProducts: Product[] = [
         nova_group: 1,
         image_url: "https://images.openfoodfacts.org/images/products/000/000/000/0001/front_en.193.400.jpg",
         image_small_url: "https://images.openfoodfacts.org/images/products/000/000/000/0001/front_en.193.200.jpg",
-        image_ingredients_url: "https://images.openfoodfacts.org/images/products/000/000/000/0001/ingredients_en.195.400.jpg",
         image_nutrition_url: "https://images.openfoodfacts.org/images/products/000/000/000/0001/nutrition_en.198.400.jpg",
         created_t: 1634745456,
         last_modified_t: 1738028711,
-        serving_size: "250g",
-        serving_quantity: 250,
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
-        main_category: "en:supplements",
-        main_category_en: "Supplements"
+        price: 3.49,
+        product_tags: ["organic", "vegan", "healthy", "smoothie", "dairy-free"]
     },
     {
         id: "00000004",
@@ -126,7 +125,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:sample",
-        main_category_en: "Sample"
+        main_category_en: "Sample",
+        price: 2.99,
+        product_tags: ["fair-trade", "organic", "eu-organic", "certified-b-corporation", "ch-bio-006", "fsc-mix"]
     },
     {
         id: "00000008",
@@ -169,7 +170,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:protein",
-        main_category_en: "Protein"
+        main_category_en: "Protein",
+        price: 19.99,
+        product_tags: ["halal", "no-lactose"]
     },
     {
         id: "00000015",
@@ -211,7 +214,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:chocolate-madeleines",
-        main_category_en: "Chocolate madeleines"
+        main_category_en: "Chocolate madeleines",
+        price: 7.99,
+        product_tags: ["chocolate", "sweets", "biscuits-and-cakes", "cakes", "chocolate-cakes", "madeleines", "chocolate-madeleines"]
     },
     {
         id: "00000010",
@@ -256,7 +261,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:plain-madeleines",
-        main_category_en: "Plain madeleines"
+        main_category_en: "Plain madeleines",
+        price: 4.99,
+        product_tags: ["fair-trade", "organic", "eu-organic", "certified-b-corporation", "ch-bio-006", "fsc-mix"]
     },
     {
         id: "0000000105",
@@ -296,7 +303,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-to-be-completed"],
         states_en: ["To be completed", "Nutrition facts to be completed"],
         main_category: "en:beverages",
-        main_category_en: "Beverages"
+        main_category_en: "Beverages",
+        price: 14.99,
+        product_tags: ["vegan", "non-gmo", "b-corp", "carbon-neutral"]
     },
     {
         id: "00000012",
@@ -335,7 +344,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-to-be-completed"],
         states_en: ["To be completed", "Nutrition facts to be completed"],
         main_category: "en:supplement",
-        main_category_en: "Supplement"
+        main_category_en: "Supplement",
+        price: 29.99,
+        product_tags: ["organic", "eu-organic", "fr-bio-01", "nutriscore"]
     },
     {
         id: "00000020",
@@ -378,7 +389,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:matcha",
-        main_category_en: "Matcha"
+        main_category_en: "Matcha",
+        price: 24.99,
+        product_tags: ["organic", "premium", "japanese", "tea", "matcha", "antioxidant"]
     },
     {
         id: "00000025",
@@ -422,7 +435,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:dark-chocolate",
-        main_category_en: "Dark chocolate"
+        main_category_en: "Dark chocolate",
+        price: 5.99,
+        product_tags: ["organic", "fair-trade", "vegan"]
     },
     {
         id: "00000030",
@@ -468,7 +483,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:protein-bars",
-        main_category_en: "Protein bars"
+        main_category_en: "Protein bars",
+        price: 4.99,
+        product_tags: ["high-protein", "gluten-free", "low-sugar"]
     },
     {
         id: "00000035",
@@ -512,7 +529,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:grains",
-        main_category_en: "Grains"
+        main_category_en: "Grains",
+        price: 3.99,
+        product_tags: ["organic", "fair-trade", "gluten-free", "non-gmo"]
     },
     {
         id: "00000040",
@@ -556,7 +575,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:kombucha",
-        main_category_en: "Kombucha"
+        main_category_en: "Kombucha",
+        price: 2.99,
+        product_tags: ["organic", "raw", "vegan", "no-added-sugar"]
     },
     {
         id: "00000045",
@@ -602,7 +623,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:meat-substitutes",
-        main_category_en: "Meat substitutes"
+        main_category_en: "Meat substitutes",
+        price: 5.99,
+        product_tags: ["vegan", "non-gmo", "b-corp", "carbon-neutral"]
     },
     {
         id: "00000050",
@@ -646,7 +669,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:yogurt-alternatives",
-        main_category_en: "Yogurt alternatives"
+        main_category_en: "Yogurt alternatives",
+        price: 3.99,
+        product_tags: ["vegan", "organic", "no-added-sugar", "probiotic"]
     },
     {
         id: "00000055",
@@ -690,7 +715,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:rye-breads",
-        main_category_en: "Rye breads"
+        main_category_en: "Rye breads",
+        price: 5.99,
+        product_tags: ["artisanal", "traditional-recipe", "no-additives"]
     },
     {
         id: "00000060",
@@ -734,7 +761,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:extra-virgin-olive-oils",
-        main_category_en: "Extra virgin olive oils"
+        main_category_en: "Extra virgin olive oils",
+        price: 14.99,
+        product_tags: ["organic", "pdo", "cold-pressed", "unfiltered"]
     },
     {
         id: "00000065",
@@ -778,7 +807,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:salmon",
-        main_category_en: "Salmon"
+        main_category_en: "Salmon",
+        price: 12.99,
+        product_tags: ["msc", "wild-caught", "no-preservatives", "flash-frozen"]
     },
     {
         id: "00000070",
@@ -823,7 +854,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:instant-noodles",
-        main_category_en: "Instant noodles"
+        main_category_en: "Instant noodles",
+        price: 1.99,
+        product_tags: ["vegetarian", "spicy-level-3"]
     },
     {
         id: "00000075",
@@ -868,7 +901,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:vanilla-yogurt",
-        main_category_en: "Vanilla yogurt"
+        main_category_en: "Vanilla yogurt",
+        price: 2.99,
+        product_tags: ["fr-bio-01"]
     },
     {
         id: "00000080",
@@ -909,7 +944,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:rice-puddings",
-        main_category_en: "Rice puddings"
+        main_category_en: "Rice puddings",
+        price: 3.99,
+        product_tags: ["fr-bio-01"]
     },
     {
         id: "00000085",
@@ -950,7 +987,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:berry-yogurts",
-        main_category_en: "Berry yogurts"
+        main_category_en: "Berry yogurts",
+        price: 2.99,
+        product_tags: ["fr-bio-01"]
     },
     {
         id: "00000090",
@@ -992,7 +1031,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:chocolate-mousses",
-        main_category_en: "Chocolate mousses"
+        main_category_en: "Chocolate mousses",
+        price: 3.99,
+        product_tags: ["fr-bio-01"]
     },
     {
         id: "00000095",
@@ -1034,7 +1075,9 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:gingerbread-blocks",
-        main_category_en: "Gingerbread blocks"
+        main_category_en: "Gingerbread blocks",
+        price: 4.99,
+        product_tags: ["fr-bio-01"]
     },
     {
         id: "00000100",
@@ -1078,6 +1121,8 @@ export const mockProducts: Product[] = [
         states_tags: ["en:to-be-completed", "en:nutrition-facts-completed"],
         states_en: ["To be completed", "Nutrition facts completed"],
         main_category: "en:vegetable-oils",
-        main_category_en: "Vegetable oils"
+        main_category_en: "Vegetable oils",
+        price: 14.99,
+        product_tags: ["fr-bio-01"]
     }
 ]; 

@@ -1,9 +1,9 @@
-import { Product } from "../stores/products.store";
+import { ProductViewModel } from "./product.types";
 
 export interface ProductService {
-    getProducts(): Promise<Product[]>;
-    getProduct(id: string): Promise<Product | null>;
-    searchProducts(query: string): Promise<Product[]>;
+    getProducts(): Promise<ProductViewModel[]>;
+    getProduct(id: string): Promise<ProductViewModel | null>;
+    searchProducts(query: string): Promise<ProductViewModel[]>;
 }
 
 export interface ServiceConfig {

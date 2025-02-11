@@ -1,0 +1,30 @@
+/* Prevent theme flash during initialization */
+.theme-initializing {
+	transition: none !important;
+}
+
+/* Theme transition for all color-related properties */
+:root {
+	--theme-transition-duration: 200ms;
+	--theme-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root:not(.theme-initializing) {
+	transition: background-color var(--theme-transition-duration)
+			var(--theme-transition-easing),
+		border-color var(--theme-transition-duration) var(--theme-transition-easing),
+		color var(--theme-transition-duration) var(--theme-transition-easing),
+		fill var(--theme-transition-duration) var(--theme-transition-easing),
+		stroke var(--theme-transition-duration) var(--theme-transition-easing);
+}
+
+/* Ensure theme classes are applied */
+:root {
+	color-scheme: light;
+	background-color: hsl(var(--background));
+	color: hsl(var(--foreground));
+}
+
+:root.dark {
+	color-scheme: dark;
+}

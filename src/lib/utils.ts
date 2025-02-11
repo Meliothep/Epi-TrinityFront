@@ -64,9 +64,13 @@ export const getFallbackImageUrl = (text: string = "No Image"): string => {
 };
 
 // Format price with currency
-export const formatPrice = (price: number | undefined | null, currency: string = '€'): string => {
-    if (price == null) return '-';
-    return `${price.toFixed(2)}${currency}`;
+export const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(price);
 };
 
 // Format nutrition value

@@ -1,80 +1,81 @@
-import { createStore } from "solid-js/store";
-import { createRoot } from "solid-js";
+import { createSignal } from "solid-js";
 
 export interface CartItem {
 	id: string;
 	quantity: number;
 }
 
-interface CartStore {
-	items: CartItem[];
-	isOpen: boolean;
-}
+const STORAGE_KEY = "trinity_cart";
 
-const [store, setStore] = createStore<CartStore>({
-	items: [],
-	isOpen: false,
-});
-
-export const useCart = () => {
-	const addToCart = (productId: string) => {
-		const existingItem = store.items.find((item) => item.id === productId);
-		if (existingItem) {
-			updateQuantity(productId, existingItem.quantity + 1);
-		} else {
-			setStore("items", (items) => [...items, { id: productId, quantity: 1 }]);
-		}
-	};
-
-	const removeFromCart = (productId: string) => {
-		setStore("items", (items) => items.filter((item) => item.id !== productId));
-	};
-
-	const updateQuantity = (productId: string, quantity: number) => {
-		if (quantity < 1) {
-			removeFromCart(productId);
-			return;
-		}
-		setStore("items", (items) =>
-			items.map((item) =>
-				item.id === productId ? { ...item, quantity } : item
-			)
-		);
-	};
-
-	const clearCart = () => {
-		setStore("items", []);
-	};
-
-	const toggleCart = () => {
-		setStore("isOpen", (isOpen) => !isOpen);
-	};
-
-	const closeCart = () => {
-		setStore("isOpen", false);
-	};
-
-	const openCart = () => {
-		setStore("isOpen", true);
-	};
-
-	const getItemCount = () => {
-		return store.items.reduce((total, item) => total + item.quantity, 0);
-	};
-
-	return {
-		items: () => store.items,
-		isOpen: () => store.isOpen,
-		addToCart,
-		removeFromCart,
-		updateQuantity,
-		clearCart,
-		toggleCart,
-		closeCart,
-		openCart,
-		getItemCount,
-	};
+// Load initial cart from localStorage
+const loadCart = (): CartItem[] => {
+	const stored = localStorage.getItem(STORAGE_KEY);
+	return stored ? JSON.parse(stored) : [];
 };
 
-// Create a root-level cart store
-export const cartStore = createRoot(() => useCart()); 
+class CartStore {
+	private cartSignal = createSignal<CartItem[]>(loadCart());
+
+	// Get cart items
+	items = () => this.cartSignal[0]();
+
+	// Get item count
+	getItemCount = () => {
+		return this.items().reduce((total, item) => total + item.quantity, 0);
+	};
+
+	// Add item to cart
+	addToCart = (productId: string) => {
+		const currentItems = this.items();
+		const existingItem = currentItems.find((item) => item.id === productId);
+
+		let newItems: CartItem[];
+		if (existingItem) {
+			newItems = currentItems.map((item) =>
+				item.id === productId
+					? { ...item, quantity: item.quantity + 1 }
+					: item
+			);
+		} else {
+			newItems = [...currentItems, { id: productId, quantity: 1 }];
+		}
+
+		this.cartSignal[1](newItems);
+		this.persistCart(newItems);
+	};
+
+	// Remove item from cart
+	removeFromCart = (productId: string) => {
+		const newItems = this.items().filter((item) => item.id !== productId);
+		this.cartSignal[1](newItems);
+		this.persistCart(newItems);
+	};
+
+	// Update item quantity
+	updateQuantity = (productId: string, quantity: number) => {
+		if (quantity <= 0) {
+			this.removeFromCart(productId);
+			return;
+		}
+
+		const newItems = this.items().map((item) =>
+			item.id === productId ? { ...item, quantity } : item
+		);
+		this.cartSignal[1](newItems);
+		this.persistCart(newItems);
+	};
+
+	// Clear cart
+	clearCart = () => {
+		this.cartSignal[1]([]);
+		this.persistCart([]);
+	};
+
+	// Private helper to persist cart to localStorage
+	private persistCart = (items: CartItem[]) => {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+	};
+}
+
+// Export a singleton instance
+export const cartStore = new CartStore(); 

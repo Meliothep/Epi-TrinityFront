@@ -20,6 +20,9 @@ importers:
       tailwind-merge:
         specifier: ^2.2.1
         version: 2.6.0
+      vite-template-solid:
+        specifier: 'file:'
+        version: file:(solid-js@1.9.3)
     devDependencies:
       '@solidjs/testing-library':
         specifier: ^0.8.10
@@ -1492,6 +1495,9 @@ packages:
     peerDependenciesMeta:
       '@testing-library/jest-dom':
         optional: true
+
+  'vite-template-solid@file:':
+    resolution: {directory: '', type: directory}
 
   vite@5.4.11:
     resolution: {integrity: sha512-c7jFQRklXua0mTzneGW9QVyxFjUgwcihC4bXEtujIo2ouWCe1Ajt/amn2PCxYnhYfd5k09JX3SB7OYWFKYqj8Q==}
@@ -2986,6 +2992,15 @@ snapshots:
       '@testing-library/jest-dom': 6.6.3
     transitivePeerDependencies:
       - supports-color
+
+  vite-template-solid@file:(solid-js@1.9.3):
+    dependencies:
+      '@solidjs/router': 0.15.3(solid-js@1.9.3)
+      clsx: 2.1.1
+      solid-icons: 1.1.0(solid-js@1.9.3)
+      tailwind-merge: 2.6.0
+    transitivePeerDependencies:
+      - solid-js
 
   vite@5.4.11:
     dependencies:
