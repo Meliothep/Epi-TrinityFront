@@ -6,12 +6,23 @@ import "./index.css";
 import { App } from "./App";
 
 // Initialize theme class early to prevent flash
-const savedTheme =
-	localStorage.getItem("theme") ||
-	(window.matchMedia("(prefers-color-scheme: dark)").matches
-		? "dark"
-		: "light");
-document.documentElement.classList.add("theme-initializing", savedTheme);
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+const savedTheme = localStorage.getItem("ui-state");
+let initialTheme = "light";
+
+try {
+	if (savedTheme) {
+		const parsed = JSON.parse(savedTheme);
+		initialTheme = parsed.theme || (prefersDark ? "dark" : "light");
+	} else {
+		initialTheme = prefersDark ? "dark" : "light";
+	}
+} catch (error) {
+	console.error("Failed to parse saved theme:", error);
+	initialTheme = prefersDark ? "dark" : "light";
+}
+
+document.documentElement.classList.add("theme-initializing", initialTheme);
 
 const root = document.getElementById("root");
 

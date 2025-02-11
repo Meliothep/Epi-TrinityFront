@@ -1,50 +1,36 @@
 import { Component, Show, For, createMemo } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { cn } from "../../lib/utils";
-import { styles } from "../../lib/styles";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { useUI } from "../../stores/ui.store";
 import { Cart } from "../features/cart/Cart";
 import { authStore } from "../../stores/auth.store";
 import { Button } from "../ui/Button";
 import { FiUser, FiMenu, FiX } from "solid-icons/fi";
-import { toast } from "react-hot-toast";
 import { adminStore } from "../../stores/admin.store";
+import { publicRoutes } from "../../routes/public/routes";
+import { protectedRoutes } from "../../routes/protected/routes";
+import { adminRoutes } from "../../routes/admin/routes";
+import { AppRoute } from "../../routes/types";
 
 interface HeaderProps {
 	class?: string;
 	sticky?: boolean;
 }
 
-interface NavLink {
-	href: string;
-	label: string;
-	end?: boolean;
-	requiresAuth?: boolean;
-	publicOnly?: boolean;
-	requiresAdmin?: boolean;
-}
-
-const navLinks: NavLink[] = [
-	{ href: "/", label: "Home", end: true },
-	{ href: "/products", label: "Products" },
-	{ href: "/categories", label: "Categories" },
-	{ href: "/orders", label: "Orders", requiresAuth: true },
-	{ href: "/profile", label: "Profile", requiresAuth: true },
-	{ href: "/admin", label: "Admin Dashboard", requiresAdmin: true },
-	{ href: "/showcase", label: "Showcase" },
-];
-
 export const Header: Component<HeaderProps> = (props) => {
 	const navigate = useNavigate();
 	const { isMobileMenuOpen, toggleMobileMenu } = useUI();
 
-	// Filter navigation links based on auth status and role
-	const filteredNavLinks = createMemo(() => {
-		return navLinks.filter((link) => {
-			if (link.requiresAuth && !authStore.isAuthenticated) return false;
-			if (link.publicOnly && authStore.isAuthenticated) return false;
-			if (link.requiresAdmin && !adminStore.isAdmin()) return false;
+	// Combine and filter navigation links based on auth status and role
+	const navigationLinks = createMemo(() => {
+		const allRoutes = [...publicRoutes, ...protectedRoutes, ...adminRoutes];
+		return allRoutes.filter((route) => {
+			// Only show routes that are marked for navigation
+			if (!route.showInNav) return false;
+			// Filter based on authentication
+			if (route.requiresAuth && !authStore.isAuthenticated) return false;
+			if (route.requiresAdmin && !adminStore.isAdmin()) return false;
 			return true;
 		});
 	});
@@ -58,8 +44,7 @@ export const Header: Component<HeaderProps> = (props) => {
 
 			// Attempt to sign out
 			await authStore.logout();
-			// Note: The page will automatically refresh and redirect to home
-			// due to the changes we made in the auth store
+			// The page will automatically refresh and redirect to home
 		} catch (error) {
 			console.error("Logout error:", error);
 		}
@@ -97,20 +82,21 @@ export const Header: Component<HeaderProps> = (props) => {
 						)}
 						aria-label="Main navigation"
 					>
-						<For each={filteredNavLinks()}>
-							{(link: NavLink) => (
-								<A
-									href={link.href}
-									class={cn(
-										"relative px-4 py-2 text-sm font-medium transition-colors",
-										"hover:text-primary rounded-full",
-										"data-[active]:text-primary data-[active]:bg-muted"
-									)}
-									end={link.end}
-									aria-current={link.end ? "page" : undefined}
-								>
-									{link.label}
-								</A>
+						<For each={navigationLinks()}>
+							{(route: AppRoute) => (
+								<Show when={route.title}>
+									<A
+										href={route.path}
+										class={cn(
+											"relative px-4 py-2 text-sm font-medium transition-colors",
+											"hover:text-primary rounded-full",
+											"data-[active]:text-primary data-[active]:bg-muted"
+										)}
+										end={route.path === "/"}
+									>
+										{route.title}
+									</A>
+								</Show>
 							)}
 						</For>
 					</nav>
@@ -218,21 +204,22 @@ export const Header: Component<HeaderProps> = (props) => {
 							class="flex flex-col space-y-1 py-4"
 							aria-label="Mobile navigation"
 						>
-							<For each={filteredNavLinks()}>
-								{(link: NavLink) => (
-									<A
-										href={link.href}
-										class={cn(
-											"px-4 py-2 text-sm font-medium transition-colors",
-											"hover:text-primary hover:bg-muted rounded-lg",
-											"data-[active]:text-primary data-[active]:bg-muted"
-										)}
-										end={link.end}
-										aria-current={link.end ? "page" : undefined}
-										onClick={toggleMobileMenu}
-									>
-										{link.label}
-									</A>
+							<For each={navigationLinks()}>
+								{(route: AppRoute) => (
+									<Show when={route.title}>
+										<A
+											href={route.path}
+											class={cn(
+												"px-4 py-2 text-sm font-medium transition-colors",
+												"hover:text-primary hover:bg-muted rounded-lg",
+												"data-[active]:text-primary data-[active]:bg-muted"
+											)}
+											end={route.path === "/"}
+											onClick={toggleMobileMenu}
+										>
+											{route.title}
+										</A>
+									</Show>
 								)}
 							</For>
 							<Show
