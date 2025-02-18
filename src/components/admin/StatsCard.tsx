@@ -1,18 +1,21 @@
 import { Component, JSX } from "solid-js";
 import { Card } from "../ui/Card";
 import { cn } from "../../lib/utils";
+import type { IconTypes } from "solid-icons/fi";
 
 interface StatsCardProps {
 	title: string;
 	value: string | number;
-	icon: (props: JSX.SvgSVGAttributes<SVGSVGElement>) => JSX.Element;
-	description?: string;
-	trend?: {
-		value: number;
-		direction: "up" | "down";
-	};
-	color?: string;
-	onClick?: () => void;
+	icon: IconTypes;
+	description?: string | undefined;
+	trend?:
+		| {
+				value: number;
+				direction: "up" | "down";
+		  }
+		| undefined;
+	color?: string | undefined;
+	onClick?: (() => void) | undefined;
 }
 
 export const StatsCard: Component<StatsCardProps> = (props) => {

@@ -244,26 +244,55 @@ export const adminStore = {
   },
 };
 
-// Auto-refresh effects
-createEffect(() => {
-  const pagination = usersPagination();
-  const filter = usersFilter();
-  const sort = usersSort();
-  adminStore.loadUsers();
-});
+// Hook for components to use
+export const useAdminStore = () => {
+  const setupUsersEffect = () => {
+    createEffect(() => {
+      const params = {
+        pagination: usersPagination(),
+        filter: usersFilter(),
+        sort: usersSort()
+      };
+      // Only load if we have valid pagination
+      if (params.pagination.page > 0 && params.pagination.limit > 0) {
+        adminStore.loadUsers();
+      }
+    });
+  };
 
-createEffect(() => {
-  const pagination = productsPagination();
-  const filter = productsFilter();
-  const sort = productsSort();
-  adminStore.loadProducts();
-});
+  const setupProductsEffect = () => {
+    createEffect(() => {
+      const params = {
+        pagination: productsPagination(),
+        filter: productsFilter(),
+        sort: productsSort()
+      };
+      // Only load if we have valid pagination
+      if (params.pagination.page > 0 && params.pagination.limit > 0) {
+        adminStore.loadProducts();
+      }
+    });
+  };
 
-createEffect(() => {
-  const pagination = ordersPagination();
-  const filter = ordersFilter();
-  const sort = ordersSort();
-  adminStore.loadOrders();
-});
+  const setupOrdersEffect = () => {
+    createEffect(() => {
+      const params = {
+        pagination: ordersPagination(),
+        filter: ordersFilter(),
+        sort: ordersSort()
+      };
+      // Only load if we have valid pagination
+      if (params.pagination.page > 0 && params.pagination.limit > 0) {
+        adminStore.loadOrders();
+      }
+    });
+  };
+
+  return {
+    setupUsersEffect,
+    setupProductsEffect,
+    setupOrdersEffect,
+  };
+};
 
 export default adminStore; 

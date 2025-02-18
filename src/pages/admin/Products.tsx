@@ -4,12 +4,13 @@ import { Card } from "../../components/common/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/forms/Input";
 import { Spinner } from "../../components/ui/Spinner";
-import { adminStore } from "../../stores/admin.store";
+import { adminStore, useAdminStore } from "../../stores/admin.store";
 import { useProducts } from "../../stores/products.store";
 import {
 	getProductImageUrl,
 	getFallbackImageUrl,
 	formatPrice,
+	cn,
 } from "../../lib/utils";
 import type { Product } from "../../types/product.types";
 import {
@@ -22,11 +23,15 @@ import {
 
 const Products: Component = () => {
 	const navigate = useNavigate();
+	const { setupProductsEffect } = useAdminStore();
 	const { products, loading, error, fetchProducts } = useProducts();
 	const [searchQuery, setSearchQuery] = createSignal("");
 	const [selectedCategory, setSelectedCategory] = createSignal<string>("");
 	const [selectedNutritionGrade, setSelectedNutritionGrade] =
 		createSignal<string>("");
+
+	// Set up the products effect to handle pagination, filtering, and sorting
+	setupProductsEffect();
 
 	// Get unique categories from products
 	const categories = () => {

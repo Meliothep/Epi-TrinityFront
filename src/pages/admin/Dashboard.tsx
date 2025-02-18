@@ -20,9 +20,30 @@ const Dashboard: Component = () => {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);
+	const [isInitialized, setIsInitialized] = createSignal(false);
 
-	// Load dashboard data
+	// Load dashboard data only once on mount
 	createEffect(async () => {
+		if (isInitialized()) return;
+
+		try {
+			setIsLoading(true);
+			setError(null);
+			await Promise.all([
+				adminStore.loadStats(),
+				adminStore.loadRecentActivity(),
+				adminStore.loadSalesTrend(),
+			]);
+			setIsInitialized(true);
+		} catch (err) {
+			setError("Failed to load dashboard data");
+			console.error("Dashboard error:", err);
+		} finally {
+			setIsLoading(false);
+		}
+	});
+
+	const handleRetry = async () => {
 		try {
 			setIsLoading(true);
 			setError(null);
@@ -37,7 +58,7 @@ const Dashboard: Component = () => {
 		} finally {
 			setIsLoading(false);
 		}
-	});
+	};
 
 	const statCards = [
 		{
@@ -99,11 +120,7 @@ const Dashboard: Component = () => {
 								</div>
 								<div>
 									<p class="text-destructive font-medium">{error()}</p>
-									<Button
-										variant="outline"
-										class="mt-4"
-										onClick={() => window.location.reload()}
-									>
+									<Button variant="outline" class="mt-4" onClick={handleRetry}>
 										Try Again
 									</Button>
 								</div>

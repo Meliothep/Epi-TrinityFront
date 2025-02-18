@@ -3,7 +3,7 @@ import { Card } from "../../components/common/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/forms/Input";
 import { Spinner } from "../../components/ui/Spinner";
-import { adminStore } from "../../stores/admin.store";
+import { adminStore, useAdminStore } from "../../stores/admin.store";
 import { authStore } from "../../stores/auth.store";
 import type { User, UserRole } from "../../types/auth.types";
 import {
@@ -14,57 +14,25 @@ import {
 	FiCheck,
 	FiX,
 } from "solid-icons/fi";
+import { cn } from "../../lib/utils";
 
 const Users: Component = () => {
+	const { setupUsersEffect } = useAdminStore();
 	const [users, setUsers] = createSignal<User[]>([]);
 	const [isLoading, setIsLoading] = createSignal(true);
 	const [error, setError] = createSignal<string | null>(null);
 	const [searchQuery, setSearchQuery] = createSignal("");
-	const [selectedRole, setSelectedRole] = createSignal<UserRole | "all">("all");
+	const [selectedRole, setSelectedRole] = createSignal<
+		"all" | "user" | "admin" | "super_admin"
+	>("all");
 	const [editingUser, setEditingUser] = createSignal<User | null>(null);
 
-	// Load users data
-	createEffect(async () => {
-		try {
-			setIsLoading(true);
-			setError(null);
-
-			// In a real app, this would be an API call
-			// For now, we'll use mock data
-			const mockUsers: User[] = [
-				{
-					id: "1",
-					email: "admin@example.com",
-					name: "Admin User",
-					role: "admin",
-					isActive: true,
-					createdAt: "2024-01-01T00:00:00.000Z",
-					lastLoginAt: "2024-02-15T10:30:00.000Z",
-				},
-				{
-					id: "2",
-					email: "user@example.com",
-					name: "Regular User",
-					role: "user",
-					isActive: true,
-					createdAt: "2024-01-15T00:00:00.000Z",
-					lastLoginAt: "2024-02-14T15:45:00.000Z",
-				},
-				// Add more mock users as needed
-			];
-
-			setUsers(mockUsers);
-		} catch (err) {
-			setError("Failed to load users");
-			console.error("Error loading users:", err);
-		} finally {
-			setIsLoading(false);
-		}
-	});
+	// Set up the users effect to handle pagination, filtering, and sorting
+	setupUsersEffect();
 
 	// Filter users based on search and role
 	const filteredUsers = () => {
-		let filtered = users();
+		let filtered = adminStore.users.items;
 
 		// Filter by search query
 		if (searchQuery()) {
@@ -96,10 +64,9 @@ const Users: Component = () => {
 
 		try {
 			// In a real app, this would be an API call
-			setUsers((prev) => prev.filter((user) => user.id !== userId));
-			// Show success message
+			await adminService.deleteUser(userId);
+			adminStore.loadUsers(); // Reload the users list
 		} catch (err) {
-			// Show error message
 			console.error("Error deleting user:", err);
 		}
 	};
@@ -139,9 +106,16 @@ const Users: Component = () => {
 					<select
 						value={selectedRole()}
 						onChange={(e) =>
-							setSelectedRole(e.currentTarget.value as UserRole | "all")
+							setSelectedRole(
+								e.currentTarget.value as
+									| "all"
+									| "user"
+									| "admin"
+									| "super_admin"
+							)
 						}
 						class="px-3 py-1.5 rounded-md border bg-background"
+						aria-label="Filter users by role"
 					>
 						<option value="all">All Roles</option>
 						<option value="user">User</option>
@@ -152,25 +126,27 @@ const Users: Component = () => {
 			</Card>
 
 			{/* Loading State */}
-			<Show when={isLoading()}>
+			<Show when={adminStore.users.loading}>
 				<div class="flex justify-center py-12">
 					<Spinner size="lg" />
 				</div>
 			</Show>
 
 			{/* Error State */}
-			<Show when={error()}>
+			<Show when={adminStore.users.error}>
 				<Card class="p-6">
 					<div class="flex flex-col items-center text-center space-y-4">
 						<div class="h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center">
 							<FiAlertCircle class="h-6 w-6 text-destructive" />
 						</div>
 						<div>
-							<p class="text-destructive font-medium">{error()}</p>
+							<p class="text-destructive font-medium">
+								{adminStore.users.error}
+							</p>
 							<Button
 								variant="outline"
 								class="mt-4"
-								onClick={() => window.location.reload()}
+								onClick={() => adminStore.loadUsers()}
 							>
 								Try Again
 							</Button>
@@ -180,105 +156,95 @@ const Users: Component = () => {
 			</Show>
 
 			{/* Users List */}
-			<Show when={!isLoading() && !error()}>
-				<div class="space-y-4">
-					<Show
-						when={filteredUsers().length > 0}
-						fallback={
-							<Card class="p-8 text-center text-muted-foreground">
-								No users found
-							</Card>
-						}
-					>
-						<div class="grid gap-4">
-							<For each={filteredUsers()}>
-								{(user) => (
-									<Card class="p-4">
-										<div class="flex items-center justify-between gap-4">
-											<div class="flex items-center gap-4">
-												<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-													<Show
-														when={user.avatar}
-														fallback={
-															<span class="text-lg font-semibold text-primary">
-																{user.name[0].toUpperCase()}
-															</span>
-														}
-													>
-														<img
-															src={user.avatar}
-															alt={user.name}
-															class="h-full w-full rounded-full object-cover"
-														/>
-													</Show>
-												</div>
-												<div>
-													<p class="font-medium">{user.name}</p>
-													<p class="text-sm text-muted-foreground">
-														{user.email}
-													</p>
-												</div>
+			<div class="space-y-4">
+				<Show
+					when={filteredUsers().length > 0}
+					fallback={
+						<Card class="p-8 text-center text-muted-foreground">
+							No users found
+						</Card>
+					}
+				>
+					<div class="grid gap-4">
+						<For each={filteredUsers()}>
+							{(user) => (
+								<Card class="p-4">
+									<div class="flex items-center justify-between gap-4">
+										<div class="flex items-center gap-4">
+											<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+												<Show
+													when={user.avatar}
+													fallback={
+														<span class="text-lg font-semibold text-primary">
+															{user.name[0].toUpperCase()}
+														</span>
+													}
+												>
+													<img
+														src={user.avatar}
+														alt={user.name}
+														class="h-full w-full rounded-full object-cover"
+													/>
+												</Show>
 											</div>
-
-											<div class="flex items-center gap-4">
-												<div class="text-right">
-													<p
-														class={cn(
-															"text-sm font-medium",
-															user.isActive
-																? "text-green-500"
-																: "text-destructive"
-														)}
-													>
-														{user.isActive ? "Active" : "Inactive"}
-													</p>
-													<p class="text-sm text-muted-foreground">
-														{user.role.charAt(0).toUpperCase() +
-															user.role.slice(1).replace("_", " ")}
-													</p>
-												</div>
-
-												<div class="flex items-center gap-2">
-													<Show
-														when={adminStore.hasPermission("users", "edit")}
-													>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => handleEditUser(user)}
-														>
-															<FiEdit2 class="h-4 w-4" />
-														</Button>
-													</Show>
-													<Show
-														when={adminStore.hasPermission("users", "delete")}
-													>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => handleDeleteUser(user.id)}
-															class="text-destructive hover:text-destructive/90"
-														>
-															<FiTrash2 class="h-4 w-4" />
-														</Button>
-													</Show>
-												</div>
+											<div>
+												<p class="font-medium">{user.name}</p>
+												<p class="text-sm text-muted-foreground">
+													{user.email}
+												</p>
 											</div>
 										</div>
 
-										<div class="mt-4 pt-4 border-t text-sm text-muted-foreground">
-											<p>Created: {formatDate(user.createdAt)}</p>
-											<Show when={user.lastLoginAt}>
-												<p>Last Login: {formatDate(user.lastLoginAt!)}</p>
+										<div class="text-right">
+											<p
+												class={cn(
+													"text-sm font-medium",
+													user.isActive ? "text-green-500" : "text-destructive"
+												)}
+											>
+												{user.isActive ? "Active" : "Inactive"}
+											</p>
+											<p class="text-sm text-muted-foreground">
+												{user.role.charAt(0).toUpperCase() +
+													user.role.slice(1).replace("_", " ")}
+											</p>
+										</div>
+
+										<div class="flex items-center gap-2">
+											<Show when={adminStore.hasPermission("users", "edit")}>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleEditUser(user)}
+												>
+													<FiEdit2 class="h-4 w-4" />
+												</Button>
+											</Show>
+											<Show when={adminStore.hasPermission("users", "delete")}>
+												<Button
+													variant="ghost"
+													size="icon"
+													onClick={() => handleDeleteUser(user.id)}
+													class="text-destructive hover:text-destructive/90"
+												>
+													<FiTrash2 class="h-4 w-4" />
+												</Button>
 											</Show>
 										</div>
-									</Card>
-								)}
-							</For>
-						</div>
-					</Show>
-				</div>
-			</Show>
+									</div>
+
+									<div class="mt-4 pt-4 border-t text-sm text-muted-foreground">
+										<p>Created: {formatDate(user.createdAt)}</p>
+										<Show when={user.lastLoginAt}>
+											<p>Last Login: {formatDate(user.lastLoginAt!)}</p>
+										</Show>
+									</div>
+								</Card>
+							)}
+						</For>
+					</div>
+				</Show>
+			</div>
 		</div>
 	);
 };
