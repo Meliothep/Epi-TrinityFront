@@ -65,7 +65,7 @@ const mockCredentials: Record<string, { password: string; userId: string }> = {
 };
 
 export class MockAuthService {
-  private mockDelay = 1000; // Simulate network delay
+  private mockDelay = 150; // Simulate network delay
 
   // Initialize with session if exists
   constructor() {
