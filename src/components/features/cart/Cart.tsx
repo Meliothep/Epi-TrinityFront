@@ -22,6 +22,7 @@ export const Cart: Component = () => {
 	const navigate = useNavigate();
 	const [isOpen, setIsOpen] = createSignal(false);
 	const [isAnimating, setIsAnimating] = createSignal(false);
+	const [isClosing, setIsClosing] = createSignal(false);
 	const { products } = useProducts();
 	const checkout = useCheckout;
 	const cart = useCart();
@@ -48,7 +49,12 @@ export const Cart: Component = () => {
 	});
 
 	const handleClose = () => {
-		setIsOpen(false);
+		setIsClosing(true);
+		// Wait for animation to complete before fully closing
+		setTimeout(() => {
+			setIsClosing(false);
+			setIsOpen(false);
+		}, 200); // Match the duration of the exit animation
 	};
 
 	const handleCheckout = () => {
@@ -79,7 +85,7 @@ export const Cart: Component = () => {
 					<span
 						class={cn(
 							"absolute -top-1 -right-1 w-4 h-4 text-xs bg-primary text-primary-foreground rounded-full flex items-center justify-center",
-							"motion-safe:animate-fade-in motion-safe:animate-duration-300"
+							"motion-opacity-in-0 motion-duration-300"
 						)}
 					>
 						{itemCount()}
@@ -87,36 +93,34 @@ export const Cart: Component = () => {
 				</Show>
 			</Button>
 
-			<Show when={isOpen()}>
+			<Show when={isOpen() || isClosing()}>
 				<Portal>
 					<div
 						class={cn(
 							"fixed inset-0 bg-background/80 backdrop-blur-sm z-50",
-							"motion-safe:animate-fade-in motion-safe:animate-duration-200",
-							!isOpen() &&
-								"motion-safe:animate-fade-out motion-safe:animate-duration-200"
+							"motion-opacity-in-0 motion-duration-200",
+							isClosing() && "motion-opacity-out-0 motion-duration-200"
 						)}
 						onClick={handleClose}
 					>
 						<div
 							class={cn(
-								"fixed right-0 top-0 h-full w-full max-w-md border-l bg-background p-6 shadow-lg",
-								"motion-safe:animate-slide-in-right motion-safe:animate-duration-300",
-								!isOpen() &&
-									"motion-safe:animate-slide-out-right motion-safe:animate-duration-200"
+								"fixed right-0 top-0 h-[100dvh] w-full max-w-md border-l bg-background p-6 shadow-lg",
+								"motion-translate-x-in-100 motion-duration-300 motion-ease-spring-smooth",
+								isClosing() && "motion-translate-x-out-100 motion-duration-200"
 							)}
 							onClick={(e) => e.stopPropagation()}
 						>
 							<div class="flex h-full flex-col">
 								<div class="flex items-center justify-between">
-									<h2 class="text-2xl font-semibold motion-safe:animate-fade-down motion-safe:animate-duration-500">
+									<h2 class="text-2xl font-semibold motion-translate-y-in-25 motion-duration-500">
 										Shopping Cart
 									</h2>
 									<Button
 										variant="ghost"
 										size="icon"
 										onClick={handleClose}
-										class="motion-safe:hover:rotate-90 transition-transform duration-200"
+										class="motion-rotate-in-180 motion-duration-200 hover:motion-rotate-out-180"
 									>
 										<span class="sr-only">Close</span>
 										<FiX class="h-6 w-6" />
@@ -129,8 +133,8 @@ export const Cart: Component = () => {
 											{(item, index) => (
 												<div
 													class={cn(
-														"motion-safe:animate-fade-in motion-safe:animate-duration-300",
-														"motion-safe:animate-delay-[var(--delay)]"
+														"motion-translate-y-in-25 motion-duration-300",
+														"motion-delay-[var(--delay)]"
 													)}
 													style={{ "--delay": `${index() * 100}ms` }}
 												>
@@ -140,12 +144,12 @@ export const Cart: Component = () => {
 										</For>
 									</div>
 
-									<div class="mt-8 border-t pt-8 motion-safe:animate-fade-up motion-safe:animate-duration-500">
+									<div class="mt-8 border-t pt-8 motion-translate-y-in-25 motion-duration-500">
 										<CartSummary />
 										<Button
 											class={cn(
 												"mt-8 w-full",
-												"motion-safe:hover:scale-[1.02] transition-transform duration-200"
+												"motion-scale-in-95 motion-duration-200"
 											)}
 											onClick={handleCheckout}
 											disabled={cartItems().length === 0}
@@ -156,10 +160,10 @@ export const Cart: Component = () => {
 								</Show>
 
 								<Show when={cartItems().length === 0}>
-									<div class="flex h-full flex-col items-center justify-center motion-safe:animate-fade-in motion-safe:animate-duration-500">
+									<div class="flex h-full flex-col items-center justify-center motion-opacity-in-0 motion-duration-500">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
-											class="h-16 w-16 text-muted-foreground motion-safe:animate-fade-down motion-safe:animate-duration-700"
+											class="h-16 w-16 text-muted-foreground motion-translate-y-in-25 motion-duration-700"
 											fill="none"
 											viewBox="0 0 24 24"
 											stroke="currentColor"
@@ -171,10 +175,10 @@ export const Cart: Component = () => {
 												d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
 											/>
 										</svg>
-										<p class="mt-4 text-lg font-medium motion-safe:animate-fade-up motion-safe:animate-delay-300">
+										<p class="mt-4 text-lg font-medium motion-translate-y-in-25 motion-delay-300">
 											Your cart is empty
 										</p>
-										<p class="mt-2 text-sm text-muted-foreground motion-safe:animate-fade-up motion-safe:animate-delay-500">
+										<p class="mt-2 text-sm text-muted-foreground motion-translate-y-in-25 motion-delay-500">
 											Add items to your cart to see them here
 										</p>
 									</div>

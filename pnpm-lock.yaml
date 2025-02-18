@@ -8,17 +8,26 @@ importers:
 
   .:
     dependencies:
+      '@kurkle/color':
+        specifier: ^0.3.4
+        version: 0.3.4
       '@solidjs/router':
         specifier: ^0.15.3
         version: 0.15.3(solid-js@1.9.3)
+      chart.js:
+        specifier: ^4.4.7
+        version: 4.4.7
       clsx:
-        specifier: ^2.1.0
+        specifier: ^2.1.1
         version: 2.1.1
+      solid-chartjs:
+        specifier: ^1.3.11
+        version: 1.3.11(chart.js@4.4.7)(solid-js@1.9.3)
       solid-icons:
         specifier: ^1.1.0
         version: 1.1.0(solid-js@1.9.3)
       tailwind-merge:
-        specifier: ^2.2.1
+        specifier: ^2.6.0
         version: 2.6.0
       vite-template-solid:
         specifier: 'file:'
@@ -375,6 +384,9 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
+  '@kurkle/color@0.3.4':
+    resolution: {integrity: sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w==}
+
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -689,6 +701,10 @@ packages:
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
+
+  chart.js@4.4.7:
+    resolution: {integrity: sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==}
+    engines: {pnpm: '>=8'}
 
   check-error@2.1.1:
     resolution: {integrity: sha512-OAlb+T7V4Op9OwdkjmguYRqncdlx5JiofwOAUkmTF+jNdHwzTaTs4sRAGpzLF3oOz5xAyDGrPgeIDFQmDOTiJw==}
@@ -1303,6 +1319,12 @@ packages:
     resolution: {integrity: sha512-BPwJGUeDaDCHihkORDchNyyTvWFhcusy1XMmhEVTQTwGeybFbp8YEmB+njbPnth1FibULBSBVwCQni25XlCUDg==}
     engines: {node: '>=18'}
 
+  solid-chartjs@1.3.11:
+    resolution: {integrity: sha512-m8j4xRTAK/AGwTvyXtUhExZh7CtwvDd6Ad2l3IxDCH/ertPPO0MWn8LhajkKnE2KQP74+4o2sVg8FAMNxitIGw==}
+    peerDependencies:
+      chart.js: ^4.3.0
+      solid-js: ^1.7.5
+
   solid-icons@1.1.0:
     resolution: {integrity: sha512-IesTfr/F1ElVwH2E1110s2RPXH4pujKfSs+koT8rwuTAdleO5s26lNSpqJV7D1+QHooJj18mcOiz2PIKs0ic+A==}
     peerDependencies:
@@ -1864,6 +1886,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@kurkle/color@0.3.4': {}
+
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
       '@nodelib/fs.stat': 2.0.5
@@ -2178,6 +2202,10 @@ snapshots:
     dependencies:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
+
+  chart.js@4.4.7:
+    dependencies:
+      '@kurkle/color': 0.3.4
 
   check-error@2.1.1: {}
 
@@ -2745,6 +2773,11 @@ snapshots:
       mrmime: 2.0.0
       totalist: 3.0.1
 
+  solid-chartjs@1.3.11(chart.js@4.4.7)(solid-js@1.9.3):
+    dependencies:
+      chart.js: 4.4.7
+      solid-js: 1.9.3
+
   solid-icons@1.1.0(solid-js@1.9.3):
     dependencies:
       solid-js: 1.9.3
@@ -2947,7 +2980,9 @@ snapshots:
   vite-template-solid@file:(solid-js@1.9.3):
     dependencies:
       '@solidjs/router': 0.15.3(solid-js@1.9.3)
+      chart.js: 4.4.7
       clsx: 2.1.1
+      solid-chartjs: 1.3.11(chart.js@4.4.7)(solid-js@1.9.3)
       solid-icons: 1.1.0(solid-js@1.9.3)
       tailwind-merge: 2.6.0
     transitivePeerDependencies:

@@ -1,4 +1,4 @@
-import { Component, Show, For, createMemo } from "solid-js";
+import { Component, Show, For, createMemo, createSignal } from "solid-js";
 import { A, useNavigate } from "@solidjs/router";
 import { cn } from "../../lib/utils";
 import { ThemeToggle } from "../ui/ThemeToggle";
@@ -12,6 +12,7 @@ import { publicRoutes } from "../../routes/public/routes";
 import { protectedRoutes } from "../../routes/protected/routes";
 import { adminRoutes } from "../../routes/admin/routes";
 import { AppRoute } from "../../routes/types";
+import { Portal } from "solid-js/web";
 
 interface HeaderProps {
 	class?: string;
@@ -21,6 +22,7 @@ interface HeaderProps {
 export const Header: Component<HeaderProps> = (props) => {
 	const navigate = useNavigate();
 	const { isMobileMenuOpen, toggleMobileMenu } = useUI();
+	const [isClosing, setIsClosing] = createSignal(false);
 
 	// Combine and filter navigation links based on auth status and role
 	const navigationLinks = createMemo(() => {
@@ -35,11 +37,20 @@ export const Header: Component<HeaderProps> = (props) => {
 		});
 	});
 
+	const handleClose = () => {
+		setIsClosing(true);
+		// Wait for animation to complete before fully closing
+		setTimeout(() => {
+			setIsClosing(false);
+			toggleMobileMenu();
+		}, 200); // Match the duration of the exit animation
+	};
+
 	const handleLogout = async () => {
 		try {
 			// Close mobile menu if open
 			if (isMobileMenuOpen()) {
-				toggleMobileMenu();
+				handleClose();
 			}
 
 			// Attempt to sign out
@@ -56,7 +67,7 @@ export const Header: Component<HeaderProps> = (props) => {
 				"w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
 				"border-b border-border/40",
 				props.sticky && "sticky top-0 z-50",
-				"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth",
+				"motion-translate-y-in-0 motion-duration-300 motion-ease-spring-smooth",
 				props.class
 			)}
 		>
@@ -211,76 +222,101 @@ export const Header: Component<HeaderProps> = (props) => {
 				</div>
 
 				{/* Mobile Menu */}
-				<Show when={isMobileMenuOpen()}>
-					<div
-						id="mobile-menu"
-						class={cn(
-							"md:hidden border-t border-border/40",
-							"bg-background/95 backdrop-blur",
-							isMobileMenuOpen()
-								? "motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-ease-spring-smooth"
-								: "motion-safe:motion-translate-y-out-100 motion-safe:motion-duration-200"
-						)}
-					>
-						<nav
-							class="flex flex-col space-y-1 py-4"
-							aria-label="Mobile navigation"
+				<Show when={isMobileMenuOpen() || isClosing()}>
+					<Portal>
+						<div
+							id="mobile-menu"
+							class={cn(
+								"fixed inset-0 bg-background/80 backdrop-blur-sm z-50",
+								"motion-opacity-in-0 motion-duration-200",
+								isClosing() && "motion-opacity-out-0 motion-duration-200"
+							)}
+							onClick={handleClose}
 						>
-							<For each={navigationLinks()}>
-								{(route: AppRoute, index) => (
-									<Show when={route.title}>
-										<A
-											href={route.path}
-											class={cn(
-												"px-4 py-2 text-sm font-medium",
-												"hover:text-primary hover:bg-muted rounded-lg transition-colors duration-200",
-												"data-[active]:text-primary data-[active]:bg-muted",
-												"motion-safe:motion-translate-x-in-25 motion-safe:motion-duration-300",
-												"motion-safe:motion-delay-[var(--delay)]"
-											)}
-											style={{ "--delay": `${index() * 50}ms` }}
-											end={route.path === "/"}
-											onClick={toggleMobileMenu}
-										>
-											{route.title}
-										</A>
-									</Show>
+							<div
+								class={cn(
+									"fixed right-0 top-0 h-[100dvh] w-full max-w-md border-l bg-background p-6 shadow-lg",
+									"motion-translate-x-in-100 motion-duration-300 motion-ease-spring-smooth",
+									isClosing() &&
+										"motion-translate-x-out-100 motion-duration-200"
 								)}
-							</For>
-							<Show
-								when={!authStore.isAuthenticated}
-								fallback={
-									<Button
-										variant="outline"
-										class={cn(
-											"mx-4 mt-3 shadow-sm",
-											"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
-										)}
-										onClick={() => {
-											handleLogout();
-											toggleMobileMenu();
-										}}
-									>
-										Sign out
-									</Button>
-								}
+								onClick={(e) => e.stopPropagation()}
 							>
-								<Button
-									variant="outline"
-									class={cn(
-										"mx-4 mt-3 shadow-sm",
-										"motion-safe:motion-translate-y-in-0 motion-safe:motion-duration-300 motion-safe:motion-delay-300"
-									)}
-									onClick={() => {
-										navigate("/login");
-										toggleMobileMenu();
-									}}
+								<div class="flex items-center justify-between mb-6">
+									<h2 class="text-xl font-semibold motion-translate-y-in-25 motion-duration-500">
+										Menu
+									</h2>
+									<Button
+										variant="ghost"
+										size="icon"
+										onClick={handleClose}
+										class="motion-rotate-in-180 motion-duration-200 hover:motion-rotate-out-180"
+									>
+										<span class="sr-only">Close menu</span>
+										<FiX class="h-6 w-6" />
+									</Button>
+								</div>
+								<nav
+									class="flex flex-col space-y-1"
+									aria-label="Mobile navigation"
 								>
-									Sign in
-								</Button>
-							</Show>
-						</nav>
-					</div>
+									<For each={navigationLinks()}>
+										{(route: AppRoute, index) => (
+											<Show when={route.title}>
+												<A
+													href={route.path}
+													class={cn(
+														"px-4 py-2 text-sm font-medium",
+														"hover:text-primary hover:bg-muted rounded-lg transition-colors duration-200",
+														"data-[active]:text-primary data-[active]:bg-muted",
+														"motion-translate-x-in-25 motion-duration-300",
+														"motion-delay-[var(--delay)]"
+													)}
+													style={{ "--delay": `${index() * 50}ms` }}
+													end={route.path === "/"}
+													onClick={toggleMobileMenu}
+												>
+													{route.title}
+												</A>
+											</Show>
+										)}
+									</For>
+									<Show
+										when={!authStore.isAuthenticated}
+										fallback={
+											<Button
+												variant="outline"
+												class={cn(
+													"mx-4 mt-6 shadow-sm",
+													"motion-translate-y-in-25 motion-duration-300 motion-delay-300"
+												)}
+												onClick={() => {
+													handleLogout();
+													toggleMobileMenu();
+												}}
+											>
+												Sign out
+											</Button>
+										}
+									>
+										<Button
+											variant="outline"
+											class={cn(
+												"mx-4 mt-6 shadow-sm",
+												"motion-translate-y-in-25 motion-duration-300 motion-delay-300"
+											)}
+											onClick={() => {
+												navigate("/login");
+												toggleMobileMenu();
+											}}
+										>
+											Sign in
+										</Button>
+									</Show>
+								</nav>
+							</div>
+						</div>
+					</Portal>
 				</Show>
 			</div>
 		</header>

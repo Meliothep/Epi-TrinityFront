@@ -1,156 +1,269 @@
-import { createSignal } from "solid-js";
-import type { User, AdminStats, AdminPermissions, UserRole } from "../types/auth.types";
-import { authStore } from "./auth.store";
+import { createStore } from 'solid-js/store';
+import { createSignal, createEffect } from 'solid-js';
+import adminService from '../mocks/admin.mock';
+import { authStore } from './auth.store';
+import type {
+  DashboardStats,
+  PaginationParams,
+  FilterParams,
+  SortParams,
+  AdminSettings,
+  Activity,
+  SalesTrendData,
+} from '../types/admin';
+import type { User } from '../types/user';
+import type { Product } from '../types/product.types';
+import type { Order } from '../types/order';
 
-class AdminStore {
-  private statsSignal = createSignal<AdminStats>({
+interface AdminState {
+  stats: DashboardStats;
+  users: {
+    items: User[];
+    total: number;
+    loading: boolean;
+    error: string | null;
+  };
+  products: {
+    items: Product[];
+    total: number;
+    loading: boolean;
+    error: string | null;
+  };
+  orders: {
+    items: Order[];
+    total: number;
+    loading: boolean;
+    error: string | null;
+  };
+  settings: AdminSettings | null;
+  recentActivity: Activity[];
+  salesTrend: SalesTrendData[];
+}
+
+const initialState: AdminState = {
+  stats: {
     totalUsers: 0,
     activeUsers: 0,
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
-    recentOrders: 0,
-    pendingOrders: 0
-  });
+    pendingOrders: 0,
+    recentActivity: [],
+    salesTrend: [],
+  },
+  users: {
+    items: [],
+    total: 0,
+    loading: false,
+    error: null,
+  },
+  products: {
+    items: [],
+    total: 0,
+    loading: false,
+    error: null,
+  },
+  orders: {
+    items: [],
+    total: 0,
+    loading: false,
+    error: null,
+  },
+  settings: null,
+  recentActivity: [],
+  salesTrend: [],
+};
 
-  private permissionsSignal = createSignal<AdminPermissions>({
-    users: {
-      view: false,
-      create: false,
-      edit: false,
-      delete: false
-    },
-    products: {
-      view: false,
-      create: false,
-      edit: false,
-      delete: false
-    },
-    orders: {
-      view: false,
-      manage: false
-    },
-    settings: {
-      view: false,
-      edit: false
-    }
-  });
+const [state, setState] = createStore<AdminState>(initialState);
 
-  // Get admin stats
-  private getStats = () => this.statsSignal[0]();
-  private setStats = (stats: AdminStats) => this.statsSignal[1](stats);
+// Pagination signals
+const [usersPagination, setUsersPagination] = createSignal<PaginationParams>({ page: 1, limit: 10 });
+const [productsPagination, setProductsPagination] = createSignal<PaginationParams>({ page: 1, limit: 10 });
+const [ordersPagination, setOrdersPagination] = createSignal<PaginationParams>({ page: 1, limit: 10 });
 
-  // Get admin permissions
-  private getPermissions = () => this.permissionsSignal[0]();
-  private setPermissions = (permissions: AdminPermissions) => this.permissionsSignal[1](permissions);
+// Filter signals
+const [usersFilter, setUsersFilter] = createSignal<FilterParams>({});
+const [productsFilter, setProductsFilter] = createSignal<FilterParams>({});
+const [ordersFilter, setOrdersFilter] = createSignal<FilterParams>({});
 
-  // Check if user is admin
-  isAdmin = () => {
-    return authStore.currentUser?.role === "admin" || authStore.currentUser?.role === "super_admin";
-  };
+// Sort signals
+const [usersSort, setUsersSort] = createSignal<SortParams>({ field: 'createdAt', direction: 'desc' });
+const [productsSort, setProductsSort] = createSignal<SortParams>({ field: 'createdAt', direction: 'desc' });
+const [ordersSort, setOrdersSort] = createSignal<SortParams>({ field: 'createdAt', direction: 'desc' });
 
-  // Check if user is super admin
-  isSuperAdmin = () => {
-    return authStore.currentUser?.role === "super_admin";
-  };
+export const adminStore = {
+  // State
+  get stats() { return state.stats; },
+  get users() { return state.users; },
+  get products() { return state.products; },
+  get orders() { return state.orders; },
+  get settings() { return state.settings; },
+  get recentActivity() { return state.recentActivity; },
+  get salesTrend() { return state.salesTrend; },
 
-  // Load admin stats
+  // Pagination getters
+  get usersPagination() { return usersPagination(); },
+  get productsPagination() { return productsPagination(); },
+  get ordersPagination() { return ordersPagination(); },
+
+  // Filter getters
+  get usersFilter() { return usersFilter(); },
+  get productsFilter() { return productsFilter(); },
+  get ordersFilter() { return ordersFilter(); },
+
+  // Sort getters
+  get usersSort() { return usersSort(); },
+  get productsSort() { return productsSort(); },
+  get ordersSort() { return ordersSort(); },
+
+  // Auth checks
+  isAdmin() {
+    return authStore.currentUser?.role === 'admin' || authStore.currentUser?.role === 'super_admin';
+  },
+
+  isSuperAdmin() {
+    return authStore.currentUser?.role === 'super_admin';
+  },
+
+  // Actions
   async loadStats() {
-    if (!this.isAdmin()) return;
-
     try {
-      // In a real app, this would be an API call
-      const mockStats: AdminStats = {
-        totalUsers: 150,
-        activeUsers: 120,
-        totalProducts: 500,
-        totalOrders: 1200,
-        totalRevenue: 45000,
-        recentOrders: 25,
-        pendingOrders: 10
-      };
-
-      this.setStats(mockStats);
-      return mockStats;
+      const stats = await adminService.fetchStats();
+      setState('stats', stats);
     } catch (error) {
-      console.error("Error loading admin stats:", error);
+      console.error('Failed to load stats:', error);
       throw error;
     }
-  }
+  },
 
-  // Load admin permissions
-  async loadPermissions() {
-    if (!this.isAdmin()) return;
-
+  async loadUsers() {
     try {
-      // In a real app, this would be an API call
-      // Here we're setting permissions based on role
-      const permissions: AdminPermissions = {
-        users: {
-          view: true,
-          create: this.isSuperAdmin(),
-          edit: this.isSuperAdmin(),
-          delete: this.isSuperAdmin()
-        },
-        products: {
-          view: true,
-          create: true,
-          edit: true,
-          delete: this.isSuperAdmin()
-        },
-        orders: {
-          view: true,
-          manage: true
-        },
-        settings: {
-          view: true,
-          edit: this.isSuperAdmin()
-        }
-      };
-
-      this.setPermissions(permissions);
-      return permissions;
+      setState('users', 'loading', true);
+      setState('users', 'error', null);
+      const { users, total } = await adminService.fetchUsers(usersPagination());
+      setState('users', {
+        items: users,
+        total,
+        loading: false,
+        error: null,
+      });
     } catch (error) {
-      console.error("Error loading admin permissions:", error);
+      setState('users', 'loading', false);
+      setState('users', 'error', 'Failed to load users');
+      console.error('Failed to load users:', error);
+    }
+  },
+
+  async loadProducts() {
+    try {
+      setState('products', 'loading', true);
+      setState('products', 'error', null);
+      const { products, total } = await adminService.fetchProducts(productsPagination());
+      setState('products', {
+        items: products,
+        total,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      setState('products', 'loading', false);
+      setState('products', 'error', 'Failed to load products');
+      console.error('Failed to load products:', error);
+    }
+  },
+
+  async loadOrders() {
+    try {
+      setState('orders', 'loading', true);
+      setState('orders', 'error', null);
+      const { orders, total } = await adminService.fetchOrders(ordersPagination());
+      setState('orders', {
+        items: orders,
+        total,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      setState('orders', 'loading', false);
+      setState('orders', 'error', 'Failed to load orders');
+      console.error('Failed to load orders:', error);
+    }
+  },
+
+  async loadRecentActivity() {
+    try {
+      const activity = await adminService.fetchRecentActivity({ limit: 10 });
+      setState('recentActivity', activity);
+    } catch (error) {
+      console.error('Failed to load recent activity:', error);
       throw error;
     }
-  }
+  },
 
-  // Check specific permission
-  hasPermission(module: keyof AdminPermissions, action: string): boolean {
-    const permissions = this.getPermissions();
-    return this.isAdmin() && permissions[module]?.[action as keyof typeof permissions[typeof module]] || false;
-  }
+  async loadSalesTrend() {
+    try {
+      const trend = await adminService.fetchSalesTrend({ days: 7 });
+      setState('salesTrend', trend);
+    } catch (error) {
+      console.error('Failed to load sales trend:', error);
+      throw error;
+    }
+  },
 
-  // Get current stats
-  get stats() {
-    return this.getStats();
-  }
+  // Pagination setters
+  setUsersPagination(params: Partial<PaginationParams>) {
+    setUsersPagination(prev => ({ ...prev, ...params }));
+  },
+  setProductsPagination(params: Partial<PaginationParams>) {
+    setProductsPagination(prev => ({ ...prev, ...params }));
+  },
+  setOrdersPagination(params: Partial<PaginationParams>) {
+    setOrdersPagination(prev => ({ ...prev, ...params }));
+  },
 
-  // Get current permissions
-  get permissions() {
-    return this.getPermissions();
-  }
+  // Filter setters
+  setUsersFilter(params: FilterParams) {
+    setUsersFilter(params);
+  },
+  setProductsFilter(params: FilterParams) {
+    setProductsFilter(params);
+  },
+  setOrdersFilter(params: FilterParams) {
+    setOrdersFilter(params);
+  },
 
-  // Clear admin state
-  clearAdminState() {
-    this.setStats({
-      totalUsers: 0,
-      activeUsers: 0,
-      totalProducts: 0,
-      totalOrders: 0,
-      totalRevenue: 0,
-      recentOrders: 0,
-      pendingOrders: 0
-    });
-    
-    this.setPermissions({
-      users: { view: false, create: false, edit: false, delete: false },
-      products: { view: false, create: false, edit: false, delete: false },
-      orders: { view: false, manage: false },
-      settings: { view: false, edit: false }
-    });
-  }
-}
+  // Sort setters
+  setUsersSort(params: SortParams) {
+    setUsersSort(params);
+  },
+  setProductsSort(params: SortParams) {
+    setProductsSort(params);
+  },
+  setOrdersSort(params: SortParams) {
+    setOrdersSort(params);
+  },
+};
 
-export const adminStore = new AdminStore(); 
+// Auto-refresh effects
+createEffect(() => {
+  const pagination = usersPagination();
+  const filter = usersFilter();
+  const sort = usersSort();
+  adminStore.loadUsers();
+});
+
+createEffect(() => {
+  const pagination = productsPagination();
+  const filter = productsFilter();
+  const sort = productsSort();
+  adminStore.loadProducts();
+});
+
+createEffect(() => {
+  const pagination = ordersPagination();
+  const filter = ordersFilter();
+  const sort = ordersSort();
+  adminStore.loadOrders();
+});
+
+export default adminStore; 
